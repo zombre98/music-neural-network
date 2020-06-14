@@ -1,2 +1,5 @@
 # Remove Pycharm directory
 .idea/
+
+# Remove dataset
+*.zip
