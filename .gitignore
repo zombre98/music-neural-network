@@ -1,2 +1,3 @@
 # Remove Pycharm directory
 .idea/
+.DS_Store
