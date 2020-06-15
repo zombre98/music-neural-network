@@ -25,5 +25,3 @@ class File:
                     if not find:
                         self.features.temposWithRepetition.append(
                             {'tempo': round(tempo2bpm(msg.tempo)), 'repetition': 1})
-                    else:
-                        find = False
