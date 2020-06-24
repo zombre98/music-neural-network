@@ -17,6 +17,9 @@ def main(argv):
     print('== AVERAGE TEMPOS PART ==')
     print(mid.features.getTemposAverageByParts())
 
+    print('= AVERAGE TEMPOS TIME =')
+    print(mid.features.getTemposAverageByPartsTime())
+
     print('====== MAX TEMPO =======')
     print(mid.features.getMaxTempo())
 
