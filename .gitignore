@@ -1,2 +1,8 @@
 # Remove Pycharm directory
 .idea/
+# Ignore VSCode workspace config
+*.code-workspace
+.vscode/
+
+# Remove dataset
+*.zip
