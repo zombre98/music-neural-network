@@ -9,13 +9,15 @@ class File:
         self.parseData()
 
     def parseData(self):
+        tempoTemp = 0
         for i, track in enumerate(self.mid.tracks):
             time = 0
             # print('Track {}: {}'.format(i, track.name))
             for msg in track:
+                time = tick2second(msg.time, self.mid.ticks_per_beat, tempoTemp) + time
                 if msg.type == 'set_tempo':
+                    tempoTemp = msg.tempo
                     # fill tempo
-                    time = tick2second(msg.time, self.mid.ticks_per_beat, msg.tempo) + time
                     self.features.tempos.append({'tempo': round(tempo2bpm(msg.tempo)), 'currentTime': time})
                     # fill tempo with repetition
                     find = False
