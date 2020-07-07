@@ -1,5 +1,6 @@
 # Remove Pycharm directory
 .idea/
+.DS_Store
 # Ignore VSCode workspace config
 *.code-workspace
 .vscode/
