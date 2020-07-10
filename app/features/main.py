@@ -1,9 +1,9 @@
 import sys
-from Features import MidiData
+from app.features.MidiData import MidiData
 
 
 def main(argv):
-    mid = MidiData.MidiData(argv[0])
+    mid = MidiData(argv[0])
 
     print('=================== TEMPOS ===================')
 

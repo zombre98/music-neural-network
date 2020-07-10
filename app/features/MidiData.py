@@ -1,6 +1,8 @@
 from mido import MidiFile, tempo2bpm, tick2second, merge_tracks
-from Features.Type.Notes import Notes
-from Features.Type.Tempos import Tempos
+# from app.features.Type.Notes import Notes
+# from app.features.Type.Tempos import Tempos
+from app.features.Type.Notes import Notes
+from app.features.Type.Tempos import Tempos
 
 
 class MidiData:
