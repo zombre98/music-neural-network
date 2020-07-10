@@ -1,11 +1,11 @@
 from mido import MidiFile, tempo2bpm, tick2second
-import FeaturesMIDI
+from app.features.FeaturesMIDI import FeaturesMIDI
 
 
 class File:
     def __init__(self, file_name):
         self.mid = MidiFile(file_name)
-        self.features = FeaturesMIDI.FeaturesMIDI()
+        self.features = FeaturesMIDI()
         self.parseData()
 
     def parseData(self):
