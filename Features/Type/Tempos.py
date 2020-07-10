@@ -1,21 +1,20 @@
-import numpy as np
-from decimal import Decimal
-
-
-class FeaturesMIDI:
+class Tempos:
     def __init__(self):
-        self.temposWithRepetition = []
-        self.tempos = []
+        self.temposWithRepetition = []  # {'tempo': , 'repetition': , 'time': }
+        self.tempos = []  # {{'tempo': , 'currentTime': }
         self.time = 0
 
-    def getRepetitionOfTempos(self):
+    def setTime(self, time):
+        self.time = time
+
+    def getRepetition(self):
         self.temposWithRepetition.sort(key=getRepetition, reverse=True)
         return self.temposWithRepetition
 
-    def getTempos(self):
+    def get(self):
         return self.tempos
 
-    def getTemposAverage(self):
+    def getAll(self):
         return [d['tempo'] for d in self.tempos]
 
     # 0: start
@@ -23,28 +22,13 @@ class FeaturesMIDI:
     # 2: middle
     # 3: middle end
     # 4: end
-    def getTemposAverageByParts(self):
-        averageMIDI = []
-        temposSplit5 = np.array_split([d['tempo'] for d in self.tempos], 5)
-        for i in range(len(temposSplit5)):
-            average = 0
-            for j in range(len(temposSplit5[i])):
-                average = average + temposSplit5[i][j]
-            averageMIDI.append(round(average / len(temposSplit5[i]), 2))
-        return averageMIDI
-
-    # 0: start
-    # 1: middle start
-    # 2: middle
-    # 3: middle end
-    # 4: end
-    def getTemposAverageByPartsTime(self):
+    def getAverageByPartsTime(self):
         averageMIDI = []
         j = 0
         timeSplit = self.time / 5
         currentTimeSplit = timeSplit
         average = 0
-        for i in range (len(self.tempos)):
+        for i in range(len(self.tempos)):
             average = average + self.tempos[i]['tempo']
             j = j + 1
             if self.tempos[i].get('currentTime') >= currentTimeSplit or currentTimeSplit == (timeSplit * 5):
@@ -54,10 +38,10 @@ class FeaturesMIDI:
                 average = 0
         return averageMIDI
 
-    def getMaxTempo(self):
+    def getMax(self):
         return max([d['tempo'] for d in self.tempos])
 
-    def getMinTempo(self):
+    def getMin(self):
         return min([d['tempo'] for d in self.tempos])
 
 
