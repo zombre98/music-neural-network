@@ -14,8 +14,8 @@ def main(argv):
     print('==== AVERAGE TEMPOS ====')
     print(mid.features.getTemposAverage())
 
-    print('== AVERAGE TEMPOS PART ==')
-    print(mid.features.getTemposAverageByParts())
+    # print('== AVERAGE TEMPOS PART ==')
+    # print(mid.features.getTemposAverageByParts())
 
     print('= AVERAGE TEMPOS TIME =')
     print(mid.features.getTemposAverageByPartsTime())
