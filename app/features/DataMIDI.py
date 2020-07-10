@@ -1,5 +1,5 @@
 from mido import MidiFile, tempo2bpm, tick2second
-from .FeaturesMIDI import FeaturesMIDI
+from app.features.FeaturesMIDI import FeaturesMIDI
 
 
 class File:
