@@ -7,3 +7,6 @@
 
 # Remove dataset
 *.zip
+
+# Ignore pycache
+__pycache__
