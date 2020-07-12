@@ -9,6 +9,11 @@ autopep8 = "*"
 [packages]
 keras = "*"
 mido = "*"
+ipykernel = "*"
+ipython = "*"
+tensorflow-gpu = "*"
+pandas = "*"
+scikit-learn = "*"
 
 [requires]
 python_version = "3.7"
