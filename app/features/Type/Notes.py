@@ -1,11 +1,11 @@
 class Notes:
     def __init__(self):
-        self.notesWithRepetition = []  # {'tempo': , 'repetition': , 'time': }
-        self.notes = []  # {{'tempo': , 'currentTime': }
-        self.time = 0
+        self.notesWithRepetition = []  # {'note': , 'repetition': , 'time': }
+        self.notes = []  # {{'note': , 'currentTime': }
+        self.totalTime = 0
 
-    def setTime(self, time):
-        self.time = time
+    def setTotalTime(self, time):
+        self.totalTime = time
 
     def getRepetition(self):
         self.notesWithRepetition.sort(key=getRepetition, reverse=True)
@@ -17,6 +17,17 @@ class Notes:
     def getAll(self):
         return [d['note'] for d in self.notes]
 
+    def append(self, note, currentTime):
+        self.notes.append({'note': note, 'currentTime': currentTime})
+
+        find = False
+        for j in range(len(self.notesWithRepetition)):
+            if self.notesWithRepetition[j].get('note') == note:
+                self.notesWithRepetition[j]['repetition'] += 1
+                find = True
+        if not find:
+            self.notesWithRepetition.append({'note': note, 'repetition': 1})
+
     # 0: start
     # 1: middle start
     # 2: middle
@@ -25,7 +36,7 @@ class Notes:
     def getAverageByPartsTime(self):
         averageMIDI = []
         j = 0
-        timeSplit = self.time / 5
+        timeSplit = self.totalTime / 5
         currentTimeSplit = timeSplit
         average = 0
         for i in range(len(self.notes)):
