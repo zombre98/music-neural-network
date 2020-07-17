@@ -1,38 +1,24 @@
 import json
 import os
+import time
+import pandas as pd
+import swifter
 
-from app.features.DataMIDI import File
+from app.features.MidiData import MidiData
 from app.cnn.cnn import CNN
 
 
-def main():
-    with open('./data/maestro-v2.0.0/maestro-v2.0.0.json', 'r') as raw:
-        data = json.load(raw)
-        files = []
-        # for e in data:
-        #     filename = e['midi_filename']
-        files.append(File('/Users/zombre/Documents/Kent/music-neural-network/data/maestro-v2.0.0/2004/MIDI'
-                          '-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'))
-        files.append(File('/Users/zombre/Documents/Kent/music-neural-network/data/maestro-v2.0.0/2004/MIDI'
-                          '-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_06_Track06_wav.midi'))
-        files.append(File('/Users/zombre/Documents/Kent/music-neural-network/data/maestro-v2.0.0/2004/MIDI'
-                          '-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_08_Track08_wav.midi'))
-        files.append(File('/Users/zombre/Documents/Kent/music-neural-network/data/maestro-v2.0.0/2004/MIDI'
-                          '-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'))
-        files.append(File('/Users/zombre/Documents/Kent/music-neural-network/data/maestro-v2.0.0/2004/MIDI'
-                          '-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_06_Track06_wav.midi'))
-        files.append(File('/Users/zombre/Documents/Kent/music-neural-network/data/maestro-v2.0.0/2004/MIDI'
-                          '-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_08_Track08_wav.midi'))
-        files.append(File('/Users/zombre/Documents/Kent/music-neural-network/data/maestro-v2.0.0/2004/MIDI'
-                          '-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'))
-        files.append(File('/Users/zombre/Documents/Kent/music-neural-network/data/maestro-v2.0.0/2004/MIDI'
-                          '-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_06_Track06_wav.midi'))
-        files.append(File('/Users/zombre/Documents/Kent/music-neural-network/data/maestro-v2.0.0/2004/MIDI'
-                          '-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_08_Track08_wav.midi'))
-        files.append(File('/Users/zombre/Documents/Kent/music-neural-network/data/maestro-v2.0.0/2004/MIDI'
-                          '-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_08_Track08_wav.midi'))
-        cnn = CNN(files)
+def get_midi_data(filename):
+    return MidiData(os.path.join("./data/maestro-v2.0.0/", filename))
 
+
+def main():
+    data = pd.read_json('./data/maestro-v2.0.0/maestro-v2.0.0.json')
+    start_time = time.time()
+    files = data['midi_filename'].swifter.progress_bar().allow_dask_on_strings().apply(get_midi_data)
+    current_time = time.time()
+    print(f'Elapsed time: {current_time - start_time}')
+    cnn = CNN(files)
 
 
 if __name__ == "__main__":

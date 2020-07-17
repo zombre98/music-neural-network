@@ -12,8 +12,9 @@ class MidiData:
         self.parseData()
 
     def parseData(self):
-        self.notes.setTotalTime(self.mid.length)
-        self.tempos.setTotalTime(self.mid.length)
+        midi_length = self.mid.length
+        self.notes.setTotalTime(midi_length)
+        self.tempos.setTotalTime(midi_length)
         currentTime = 0
         tempoTemp = 0
         for msg in merge_tracks(self.mid.tracks):
