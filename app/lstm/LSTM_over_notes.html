@@ -2,7 +2,7 @@
 <html>
 <head><meta charset="utf-8" />
 
-<title>LSTM_on_binary</title>
+<title>LSTM_over_notes</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
@@ -13076,7 +13076,7 @@ div#notebook {
 
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -13088,6 +13088,8 @@ div#notebook {
 <span class="kn">from</span> <span class="nn">tensorflow.keras</span> <span class="kn">import</span> <span class="n">layers</span>
 
 <span class="kn">from</span> <span class="nn">app.features.MidiData</span> <span class="kn">import</span> <span class="n">MidiData</span>
+
+<span class="n">DATASET_DIR</span> <span class="o">=</span> <span class="s1">&#39;../../data/maestro-v2.0.0&#39;</span>
 </pre></div>
 
     </div>
@@ -13097,10 +13099,11 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">import</span> <span class="nn">swifter</span>
 
 <span class="n">dtype</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;canonical_composer&#39;</span><span class="p">:</span> <span class="s1">&#39;category&#39;</span><span class="p">,</span>
@@ -13111,7 +13114,7 @@ div#notebook {
     <span class="s1">&#39;audio_filename&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
     <span class="s1">&#39;duration&#39;</span><span class="p">:</span> <span class="s1">&#39;float64&#39;</span>
 <span class="p">}</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="s1">&#39;../../data/maestro-v2.0.0/maestro-v2.0.0.json&#39;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATASET_DIR</span><span class="p">,</span> <span class="s1">&#39;maestro-v2.0.0.json&#39;</span><span class="p">))</span>
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
 </pre></div>
 
@@ -13122,32 +13125,14 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%time</span>
 <span class="k">def</span> <span class="nf">get_midi_data</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">MidiData</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATASET_DIR</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
 
-<span class="k">def</span> <span class="nf">filesize</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;../../data/maestro-v2.0.0/&#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;../../data/maestro-v2.0.0/&#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-    
-<span class="k">def</span> <span class="nf">bytes_as_array</span><span class="p">(</span><span class="n">limit</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">with_limit</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">file</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">limit</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int8&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mf">255.0</span>
-    <span class="k">return</span> <span class="n">with_limit</span>
-
-<span class="k">def</span> <span class="nf">code_to_label</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">dataset</span><span class="o">.</span><span class="n">canonical_composer</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span><span class="p">[</span><span class="n">code</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="n">testing</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">testing</span><span class="p">[</span><span class="s1">&#39;midi_filesize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testing</span><span class="p">[</span><span class="s1">&#39;midi_filename&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">filesize</span><span class="p">)</span>
-<span class="n">testing</span><span class="p">[</span><span class="s1">&#39;midi_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testing</span><span class="p">[</span><span class="s1">&#39;midi_filename&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">read_file</span><span class="p">)</span>
-<span class="n">testing</span><span class="p">[</span><span class="s1">&#39;midi_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testing</span><span class="p">[</span><span class="s1">&#39;midi_filename&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">swifter</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">()</span><span class="o">.</span><span class="n">allow_dask_on_strings</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">get_midi_data</span><span class="p">)</span>
+<span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;midi_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;midi_filename&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">swifter</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">()</span><span class="o">.</span><span class="n">allow_dask_on_strings</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">get_midi_data</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -13163,25 +13148,128 @@ div#notebook {
     <div class="prompt"></div>
 
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>&lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;
-RangeIndex: 1282 entries, 0 to 1281
-Data columns (total 10 columns):
- #   Column              Non-Null Count  Dtype   
----  ------              --------------  -----   
- 0   canonical_composer  1282 non-null   category
- 1   canonical_title     1282 non-null   object  
- 2   split               1282 non-null   category
- 3   year                1282 non-null   int64   
- 4   midi_filename       1282 non-null   object  
- 5   audio_filename      1282 non-null   object  
- 6   duration            1282 non-null   float64 
- 7   midi_filesize       1282 non-null   int64   
- 8   midi_file           1282 non-null   object  
- 9   bytes_features      1282 non-null   object  
-dtypes: category(2), float64(1), int64(2), object(5)
-memory usage: 85.8+ KB
-</pre>
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-intense-fg ansi-bold">---------------------------------------------------------------------------</span>
+<span class="ansi-red-intense-fg ansi-bold">TypeError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-intense-fg ansi-bold">~\.virtualenvs\music-neural-network-CE8S9iX1\lib\site-packages\swifter\swifter.py</span> in <span class="ansi-cyan-fg">apply</span><span class="ansi-blue-intense-fg ansi-bold">(self, func, convert_dtype, args, **kwds)</span>
+<span class="ansi-green-fg">    249</span>             <span class="ansi-green-intense-fg ansi-bold">with</span> suppress_stdout_stderr<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 250</span><span class="ansi-yellow-intense-fg ansi-bold">                 </span>tmp_df <span class="ansi-yellow-intense-fg ansi-bold">=</span> func<span class="ansi-yellow-intense-fg ansi-bold">(</span>sample<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">*</span>args<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">**</span>kwds<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    251</span>                 sample_df <span class="ansi-yellow-intense-fg ansi-bold">=</span> sample<span class="ansi-yellow-intense-fg ansi-bold">.</span>apply<span class="ansi-yellow-intense-fg ansi-bold">(</span>func<span class="ansi-yellow-intense-fg ansi-bold">,</span> convert_dtype<span class="ansi-yellow-intense-fg ansi-bold">=</span>convert_dtype<span class="ansi-yellow-intense-fg ansi-bold">,</span> args<span class="ansi-yellow-intense-fg ansi-bold">=</span>args<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">**</span>kwds<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">&lt;timed exec&gt;</span> in <span class="ansi-cyan-fg">get_midi_data</span><span class="ansi-blue-intense-fg ansi-bold">(filename)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">c:\users\armand\anaconda3\lib\ntpath.py</span> in <span class="ansi-cyan-fg">join</span><span class="ansi-blue-intense-fg ansi-bold">(path, *paths)</span>
+<span class="ansi-green-fg">    114</span>     <span class="ansi-green-intense-fg ansi-bold">except</span> <span class="ansi-yellow-intense-fg ansi-bold">(</span>TypeError<span class="ansi-yellow-intense-fg ansi-bold">,</span> AttributeError<span class="ansi-yellow-intense-fg ansi-bold">,</span> BytesWarning<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 115</span><span class="ansi-yellow-intense-fg ansi-bold">         </span>genericpath<span class="ansi-yellow-intense-fg ansi-bold">.</span>_check_arg_types<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-blue-intense-fg ansi-bold">&#39;join&#39;</span><span class="ansi-yellow-intense-fg ansi-bold">,</span> path<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">*</span>paths<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    116</span>         <span class="ansi-green-intense-fg ansi-bold">raise</span>
+
+<span class="ansi-green-intense-fg ansi-bold">c:\users\armand\anaconda3\lib\genericpath.py</span> in <span class="ansi-cyan-fg">_check_arg_types</span><span class="ansi-blue-intense-fg ansi-bold">(funcname, *args)</span>
+<span class="ansi-green-fg">    152</span>             raise TypeError(&#39;%s() argument must be str or bytes, not %r&#39; %
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 153</span><span class="ansi-yellow-intense-fg ansi-bold">                             (funcname, s.__class__.__name__)) from None
+</span><span class="ansi-green-fg">    154</span>     <span class="ansi-green-intense-fg ansi-bold">if</span> hasstr <span class="ansi-green-intense-fg ansi-bold">and</span> hasbytes<span class="ansi-yellow-intense-fg ansi-bold">:</span>
+
+<span class="ansi-red-intense-fg ansi-bold">TypeError</span>: join() argument must be str or bytes, not &#39;Series&#39;
+
+During handling of the above exception, another exception occurred:
+
+<span class="ansi-red-intense-fg ansi-bold">KeyboardInterrupt</span>                         Traceback (most recent call last)
+<span class="ansi-green-intense-fg ansi-bold">&lt;timed exec&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+
+<span class="ansi-green-intense-fg ansi-bold">~\.virtualenvs\music-neural-network-CE8S9iX1\lib\site-packages\swifter\swifter.py</span> in <span class="ansi-cyan-fg">apply</span><span class="ansi-blue-intense-fg ansi-bold">(self, func, convert_dtype, args, **kwds)</span>
+<span class="ansi-green-fg">    257</span>         <span class="ansi-green-intense-fg ansi-bold">except</span> ERRORS_TO_HANDLE<span class="ansi-yellow-intense-fg ansi-bold">:</span>  <span class="ansi-red-intense-fg ansi-bold"># if can&#39;t vectorize, estimate time to pandas apply</span>
+<span class="ansi-green-fg">    258</span>             wrapped <span class="ansi-yellow-intense-fg ansi-bold">=</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_wrapped_apply<span class="ansi-yellow-intense-fg ansi-bold">(</span>func<span class="ansi-yellow-intense-fg ansi-bold">,</span> convert_dtype<span class="ansi-yellow-intense-fg ansi-bold">=</span>convert_dtype<span class="ansi-yellow-intense-fg ansi-bold">,</span> args<span class="ansi-yellow-intense-fg ansi-bold">=</span>args<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">**</span>kwds<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 259</span><span class="ansi-yellow-intense-fg ansi-bold">             </span>timed <span class="ansi-yellow-intense-fg ansi-bold">=</span> timeit<span class="ansi-yellow-intense-fg ansi-bold">.</span>timeit<span class="ansi-yellow-intense-fg ansi-bold">(</span>wrapped<span class="ansi-yellow-intense-fg ansi-bold">,</span> number<span class="ansi-yellow-intense-fg ansi-bold">=</span>N_REPEATS<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    260</span>             sample_proc_est <span class="ansi-yellow-intense-fg ansi-bold">=</span> timed <span class="ansi-yellow-intense-fg ansi-bold">/</span> N_REPEATS
+<span class="ansi-green-fg">    261</span>             est_apply_duration <span class="ansi-yellow-intense-fg ansi-bold">=</span> sample_proc_est <span class="ansi-yellow-intense-fg ansi-bold">/</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_SAMPLE_SIZE <span class="ansi-yellow-intense-fg ansi-bold">*</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_obj<span class="ansi-yellow-intense-fg ansi-bold">.</span>shape<span class="ansi-yellow-intense-fg ansi-bold">[</span><span class="ansi-cyan-intense-fg ansi-bold">0</span><span class="ansi-yellow-intense-fg ansi-bold">]</span>
+
+<span class="ansi-green-intense-fg ansi-bold">c:\users\armand\anaconda3\lib\timeit.py</span> in <span class="ansi-cyan-fg">timeit</span><span class="ansi-blue-intense-fg ansi-bold">(stmt, setup, timer, number, globals)</span>
+<span class="ansi-green-fg">    230</span>            number=default_number, globals=None):
+<span class="ansi-green-fg">    231</span>     <span class="ansi-blue-intense-fg ansi-bold">&#34;&#34;&#34;Convenience function to create Timer object and call timeit method.&#34;&#34;&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 232</span><span class="ansi-yellow-intense-fg ansi-bold">     </span><span class="ansi-green-intense-fg ansi-bold">return</span> Timer<span class="ansi-yellow-intense-fg ansi-bold">(</span>stmt<span class="ansi-yellow-intense-fg ansi-bold">,</span> setup<span class="ansi-yellow-intense-fg ansi-bold">,</span> timer<span class="ansi-yellow-intense-fg ansi-bold">,</span> globals<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">.</span>timeit<span class="ansi-yellow-intense-fg ansi-bold">(</span>number<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    233</span> 
+<span class="ansi-green-fg">    234</span> def repeat(stmt=&#34;pass&#34;, setup=&#34;pass&#34;, timer=default_timer,
+
+<span class="ansi-green-intense-fg ansi-bold">c:\users\armand\anaconda3\lib\timeit.py</span> in <span class="ansi-cyan-fg">timeit</span><span class="ansi-blue-intense-fg ansi-bold">(self, number)</span>
+<span class="ansi-green-fg">    174</span>         gc<span class="ansi-yellow-intense-fg ansi-bold">.</span>disable<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    175</span>         <span class="ansi-green-intense-fg ansi-bold">try</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 176</span><span class="ansi-yellow-intense-fg ansi-bold">             </span>timing <span class="ansi-yellow-intense-fg ansi-bold">=</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>inner<span class="ansi-yellow-intense-fg ansi-bold">(</span>it<span class="ansi-yellow-intense-fg ansi-bold">,</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>timer<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    177</span>         <span class="ansi-green-intense-fg ansi-bold">finally</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">    178</span>             <span class="ansi-green-intense-fg ansi-bold">if</span> gcold<span class="ansi-yellow-intense-fg ansi-bold">:</span>
+
+<span class="ansi-green-intense-fg ansi-bold">c:\users\armand\anaconda3\lib\timeit.py</span> in <span class="ansi-cyan-fg">inner</span><span class="ansi-blue-intense-fg ansi-bold">(_it, _timer, _stmt)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">~\.virtualenvs\music-neural-network-CE8S9iX1\lib\site-packages\swifter\swifter.py</span> in <span class="ansi-cyan-fg">wrapped</span><span class="ansi-blue-intense-fg ansi-bold">()</span>
+<span class="ansi-green-fg">    181</span>         <span class="ansi-green-intense-fg ansi-bold">def</span> wrapped<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">    182</span>             <span class="ansi-green-intense-fg ansi-bold">with</span> suppress_stdout_stderr<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 183</span><span class="ansi-yellow-intense-fg ansi-bold">                 </span>self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_obj<span class="ansi-yellow-intense-fg ansi-bold">.</span>iloc<span class="ansi-yellow-intense-fg ansi-bold">[</span><span class="ansi-yellow-intense-fg ansi-bold">:</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>_SAMPLE_SIZE<span class="ansi-yellow-intense-fg ansi-bold">]</span><span class="ansi-yellow-intense-fg ansi-bold">.</span>apply<span class="ansi-yellow-intense-fg ansi-bold">(</span>func<span class="ansi-yellow-intense-fg ansi-bold">,</span> convert_dtype<span class="ansi-yellow-intense-fg ansi-bold">=</span>convert_dtype<span class="ansi-yellow-intense-fg ansi-bold">,</span> args<span class="ansi-yellow-intense-fg ansi-bold">=</span>args<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">**</span>kwds<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    184</span> 
+<span class="ansi-green-fg">    185</span>         <span class="ansi-green-intense-fg ansi-bold">return</span> wrapped
+
+<span class="ansi-green-intense-fg ansi-bold">~\.virtualenvs\music-neural-network-CE8S9iX1\lib\site-packages\pandas\core\series.py</span> in <span class="ansi-cyan-fg">apply</span><span class="ansi-blue-intense-fg ansi-bold">(self, func, convert_dtype, args, **kwds)</span>
+<span class="ansi-green-fg">   3846</span>             <span class="ansi-green-intense-fg ansi-bold">else</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">   3847</span>                 values <span class="ansi-yellow-intense-fg ansi-bold">=</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>astype<span class="ansi-yellow-intense-fg ansi-bold">(</span>object<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">.</span>values
+<span class="ansi-green-intense-fg ansi-bold">-&gt; 3848</span><span class="ansi-yellow-intense-fg ansi-bold">                 </span>mapped <span class="ansi-yellow-intense-fg ansi-bold">=</span> lib<span class="ansi-yellow-intense-fg ansi-bold">.</span>map_infer<span class="ansi-yellow-intense-fg ansi-bold">(</span>values<span class="ansi-yellow-intense-fg ansi-bold">,</span> f<span class="ansi-yellow-intense-fg ansi-bold">,</span> convert<span class="ansi-yellow-intense-fg ansi-bold">=</span>convert_dtype<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">   3849</span> 
+<span class="ansi-green-fg">   3850</span>         <span class="ansi-green-intense-fg ansi-bold">if</span> len<span class="ansi-yellow-intense-fg ansi-bold">(</span>mapped<span class="ansi-yellow-intense-fg ansi-bold">)</span> <span class="ansi-green-intense-fg ansi-bold">and</span> isinstance<span class="ansi-yellow-intense-fg ansi-bold">(</span>mapped<span class="ansi-yellow-intense-fg ansi-bold">[</span><span class="ansi-cyan-intense-fg ansi-bold">0</span><span class="ansi-yellow-intense-fg ansi-bold">]</span><span class="ansi-yellow-intense-fg ansi-bold">,</span> Series<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+
+<span class="ansi-green-intense-fg ansi-bold">pandas\_libs\lib.pyx</span> in <span class="ansi-cyan-fg">pandas._libs.lib.map_infer</span><span class="ansi-blue-intense-fg ansi-bold">()</span>
+
+<span class="ansi-green-intense-fg ansi-bold">&lt;timed exec&gt;</span> in <span class="ansi-cyan-fg">get_midi_data</span><span class="ansi-blue-intense-fg ansi-bold">(filename)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">~\Code\music-neural-network\app\features\MidiData.py</span> in <span class="ansi-cyan-fg">__init__</span><span class="ansi-blue-intense-fg ansi-bold">(self, file_name)</span>
+<span class="ansi-green-fg">     10</span>         self<span class="ansi-yellow-intense-fg ansi-bold">.</span>notes <span class="ansi-yellow-intense-fg ansi-bold">=</span> Notes<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">     11</span> 
+<span class="ansi-green-intense-fg ansi-bold">---&gt; 12</span><span class="ansi-yellow-intense-fg ansi-bold">         </span>self<span class="ansi-yellow-intense-fg ansi-bold">.</span>parseData<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">     13</span> 
+<span class="ansi-green-fg">     14</span>     <span class="ansi-green-intense-fg ansi-bold">def</span> parseData<span class="ansi-yellow-intense-fg ansi-bold">(</span>self<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+
+<span class="ansi-green-intense-fg ansi-bold">~\Code\music-neural-network\app\features\MidiData.py</span> in <span class="ansi-cyan-fg">parseData</span><span class="ansi-blue-intense-fg ansi-bold">(self)</span>
+<span class="ansi-green-fg">     16</span>         tickTime <span class="ansi-yellow-intense-fg ansi-bold">=</span> <span class="ansi-cyan-intense-fg ansi-bold">0</span>
+<span class="ansi-green-fg">     17</span>         tempoTemp <span class="ansi-yellow-intense-fg ansi-bold">=</span> <span class="ansi-cyan-intense-fg ansi-bold">0</span>
+<span class="ansi-green-intense-fg ansi-bold">---&gt; 18</span><span class="ansi-yellow-intense-fg ansi-bold">         </span><span class="ansi-green-intense-fg ansi-bold">for</span> msg <span class="ansi-green-intense-fg ansi-bold">in</span> merge_tracks<span class="ansi-yellow-intense-fg ansi-bold">(</span>self<span class="ansi-yellow-intense-fg ansi-bold">.</span>mid<span class="ansi-yellow-intense-fg ansi-bold">.</span>tracks<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">     19</span>             tickTime <span class="ansi-yellow-intense-fg ansi-bold">+=</span> msg<span class="ansi-yellow-intense-fg ansi-bold">.</span>time
+<span class="ansi-green-fg">     20</span>             currentTime <span class="ansi-yellow-intense-fg ansi-bold">+=</span> tick2second<span class="ansi-yellow-intense-fg ansi-bold">(</span>msg<span class="ansi-yellow-intense-fg ansi-bold">.</span>time<span class="ansi-yellow-intense-fg ansi-bold">,</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>mid<span class="ansi-yellow-intense-fg ansi-bold">.</span>ticks_per_beat<span class="ansi-yellow-intense-fg ansi-bold">,</span> tempoTemp<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">~\.virtualenvs\music-neural-network-CE8S9iX1\lib\site-packages\mido\midifiles\tracks.py</span> in <span class="ansi-cyan-fg">merge_tracks</span><span class="ansi-blue-intense-fg ansi-bold">(tracks)</span>
+<span class="ansi-green-fg">    106</span>     messages<span class="ansi-yellow-intense-fg ansi-bold">.</span>sort<span class="ansi-yellow-intense-fg ansi-bold">(</span>key<span class="ansi-yellow-intense-fg ansi-bold">=</span><span class="ansi-green-intense-fg ansi-bold">lambda</span> msg<span class="ansi-yellow-intense-fg ansi-bold">:</span> msg<span class="ansi-yellow-intense-fg ansi-bold">.</span>time<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    107</span> 
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 108</span><span class="ansi-yellow-intense-fg ansi-bold">     </span><span class="ansi-green-intense-fg ansi-bold">return</span> MidiTrack<span class="ansi-yellow-intense-fg ansi-bold">(</span>fix_end_of_track<span class="ansi-yellow-intense-fg ansi-bold">(</span>_to_reltime<span class="ansi-yellow-intense-fg ansi-bold">(</span>messages<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">~\.virtualenvs\music-neural-network-CE8S9iX1\lib\site-packages\mido\midifiles\tracks.py</span> in <span class="ansi-cyan-fg">fix_end_of_track</span><span class="ansi-blue-intense-fg ansi-bold">(messages)</span>
+<span class="ansi-green-fg">     80</span>     accum <span class="ansi-yellow-intense-fg ansi-bold">=</span> <span class="ansi-cyan-intense-fg ansi-bold">0</span>
+<span class="ansi-green-fg">     81</span> 
+<span class="ansi-green-intense-fg ansi-bold">---&gt; 82</span><span class="ansi-yellow-intense-fg ansi-bold">     </span><span class="ansi-green-intense-fg ansi-bold">for</span> msg <span class="ansi-green-intense-fg ansi-bold">in</span> messages<span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">     83</span>         <span class="ansi-green-intense-fg ansi-bold">if</span> msg<span class="ansi-yellow-intense-fg ansi-bold">.</span>type <span class="ansi-yellow-intense-fg ansi-bold">==</span> <span class="ansi-blue-intense-fg ansi-bold">&#39;end_of_track&#39;</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">     84</span>             accum <span class="ansi-yellow-intense-fg ansi-bold">+=</span> msg<span class="ansi-yellow-intense-fg ansi-bold">.</span>time
+
+<span class="ansi-green-intense-fg ansi-bold">~\.virtualenvs\music-neural-network-CE8S9iX1\lib\site-packages\mido\midifiles\tracks.py</span> in <span class="ansi-cyan-fg">_to_reltime</span><span class="ansi-blue-intense-fg ansi-bold">(messages)</span>
+<span class="ansi-green-fg">     68</span>     <span class="ansi-green-intense-fg ansi-bold">for</span> msg <span class="ansi-green-intense-fg ansi-bold">in</span> messages<span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-fg">     69</span>         delta <span class="ansi-yellow-intense-fg ansi-bold">=</span> msg<span class="ansi-yellow-intense-fg ansi-bold">.</span>time <span class="ansi-yellow-intense-fg ansi-bold">-</span> now
+<span class="ansi-green-intense-fg ansi-bold">---&gt; 70</span><span class="ansi-yellow-intense-fg ansi-bold">         </span><span class="ansi-green-intense-fg ansi-bold">yield</span> msg<span class="ansi-yellow-intense-fg ansi-bold">.</span>copy<span class="ansi-yellow-intense-fg ansi-bold">(</span>time<span class="ansi-yellow-intense-fg ansi-bold">=</span>delta<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">     71</span>         now <span class="ansi-yellow-intense-fg ansi-bold">=</span> msg<span class="ansi-yellow-intense-fg ansi-bold">.</span>time
+<span class="ansi-green-fg">     72</span> 
+
+<span class="ansi-green-intense-fg ansi-bold">~\.virtualenvs\music-neural-network-CE8S9iX1\lib\site-packages\mido\messages\messages.py</span> in <span class="ansi-cyan-fg">copy</span><span class="ansi-blue-intense-fg ansi-bold">(self, **overrides)</span>
+<span class="ansi-green-fg">    110</span>         msgdict <span class="ansi-yellow-intense-fg ansi-bold">=</span> vars<span class="ansi-yellow-intense-fg ansi-bold">(</span>self<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">.</span>copy<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    111</span>         msgdict<span class="ansi-yellow-intense-fg ansi-bold">.</span>update<span class="ansi-yellow-intense-fg ansi-bold">(</span>overrides<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-intense-fg ansi-bold">--&gt; 112</span><span class="ansi-yellow-intense-fg ansi-bold">         </span>check_msgdict<span class="ansi-yellow-intense-fg ansi-bold">(</span>msgdict<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    113</span>         <span class="ansi-green-intense-fg ansi-bold">return</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>__class__<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">**</span>msgdict<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">    114</span> 
+
+<span class="ansi-green-intense-fg ansi-bold">~\.virtualenvs\music-neural-network-CE8S9iX1\lib\site-packages\mido\messages\checks.py</span> in <span class="ansi-cyan-fg">check_msgdict</span><span class="ansi-blue-intense-fg ansi-bold">(msgdict)</span>
+<span class="ansi-green-fg">     97</span>                 &#39;{} message has no attribute {}&#39;.format(spec[&#39;type&#39;], name))
+<span class="ansi-green-fg">     98</span> 
+<span class="ansi-green-intense-fg ansi-bold">---&gt; 99</span><span class="ansi-yellow-intense-fg ansi-bold">         </span>check_value<span class="ansi-yellow-intense-fg ansi-bold">(</span>name<span class="ansi-yellow-intense-fg ansi-bold">,</span> value<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+
+<span class="ansi-green-intense-fg ansi-bold">~\.virtualenvs\music-neural-network-CE8S9iX1\lib\site-packages\mido\messages\checks.py</span> in <span class="ansi-cyan-fg">check_value</span><span class="ansi-blue-intense-fg ansi-bold">(name, value)</span>
+<span class="ansi-green-fg">     84</span> 
+<span class="ansi-green-fg">     85</span> <span class="ansi-green-intense-fg ansi-bold">def</span> check_value<span class="ansi-yellow-intense-fg ansi-bold">(</span>name<span class="ansi-yellow-intense-fg ansi-bold">,</span> value<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
+<span class="ansi-green-intense-fg ansi-bold">---&gt; 86</span><span class="ansi-yellow-intense-fg ansi-bold">     </span>_CHECKS<span class="ansi-yellow-intense-fg ansi-bold">[</span>name<span class="ansi-yellow-intense-fg ansi-bold">]</span><span class="ansi-yellow-intense-fg ansi-bold">(</span>value<span class="ansi-yellow-intense-fg ansi-bold">)</span>
+<span class="ansi-green-fg">     87</span> 
+<span class="ansi-green-fg">     88</span> 
+
+<span class="ansi-red-intense-fg ansi-bold">KeyboardInterrupt</span>: </pre>
 </div>
 </div>
 
@@ -13191,27 +13279,10 @@ memory usage: 85.8+ KB
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="c1"># input_dim = 28</span>
-
-<span class="n">units</span> <span class="o">=</span> <span class="mi">128</span>
-<span class="n">output_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">testing</span><span class="o">.</span><span class="n">canonical_composer</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;output_size: </span><span class="si">{output_size}</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="c1"># output_size = 10</span>
-
-<span class="c1"># Build the RNN model</span>
-<span class="k">def</span> <span class="nf">build_model</span><span class="p">():</span>
-    <span class="n">lstm_layer</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">LSTM</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="n">lstm_layer</span><span class="p">,</span>
-            <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">BatchNormalization</span><span class="p">(),</span>
-            <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">output_size</span><span class="p">),</span>
-        <span class="p">]</span>
-    <span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;midi_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">notes</span>
 </pre></div>
 
     </div>
@@ -13224,525 +13295,1015 @@ memory usage: 85.8+ KB
 
 <div class="output_area">
 
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>output_size: 61
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[54]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">train</span> <span class="o">=</span> <span class="n">testing</span><span class="p">[</span><span class="n">testing</span><span class="o">.</span><span class="n">split</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span><span class="p">]</span>
-<span class="n">test</span> <span class="o">=</span> <span class="n">testing</span><span class="p">[</span><span class="n">testing</span><span class="o">.</span><span class="n">split</span> <span class="o">==</span> <span class="s1">&#39;test&#39;</span><span class="p">]</span>
-<span class="n">x_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="s1">&#39;bytes_features&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">y_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="s1">&#39;canonical_composer&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">codes</span><span class="p">)</span>
-<span class="n">x_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;bytes_features&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">y_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;canonical_composer&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">codes</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;dataset created:&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;train: </span><span class="si">{x_train.shape}</span><span class="s1">, </span><span class="si">{y_train.shape}</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;test:  </span><span class="si">{x_test.shape}</span><span class="s1">, </span><span class="si">{y_test.shape}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">build_model</span><span class="p">()</span>
-<span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-    <span class="n">loss</span><span class="o">=</span><span class="n">keras</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">SparseCategoricalCrossentropy</span><span class="p">(</span><span class="n">from_logits</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-    <span class="n">optimizer</span><span class="o">=</span><span class="s2">&quot;adam&quot;</span><span class="p">,</span>
-    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">],</span>
-<span class="p">)</span>
-
-<span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
-
-
-<span class="n">checkpoint</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">ModelCheckpoint</span><span class="p">(</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;saved_models&#39;</span><span class="p">,</span> <span class="s1">&#39;best.hdf5&#39;</span><span class="p">),</span>
-    <span class="n">monitor</span><span class="o">=</span><span class="s1">&#39;val_accuracy&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">save_best_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;max&#39;</span>
-<span class="p">)</span>
-
-
-<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">validation_data</span><span class="o">=</span><span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">),</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">checkpoint</span><span class="p">])</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>dataset created:
-train: (967, 3096, 1), (967,)
-test:  (178, 3096, 1), (178,)
-Model: &#34;sequential_34&#34;
-_________________________________________________________________
-Layer (type)                 Output Shape              Param #   
-=================================================================
-lstm_34 (LSTM)               (None, 128)               66560     
-_________________________________________________________________
-batch_normalization_34 (Batc (None, 128)               512       
-_________________________________________________________________
-dense_34 (Dense)             (None, 61)                7869      
-=================================================================
-Total params: 74,941
-Trainable params: 74,685
-Non-trainable params: 256
-_________________________________________________________________
-Epoch 1/20
-61/61 [==============================] - ETA: 0s - loss: 3.9768 - accuracy: 0.1065
-Epoch 00001: val_accuracy improved from -inf to 0.15169, saving model to C:\Users\Armand\Code\music-neural-network\app\lstm\saved_models\best.hdf5
-61/61 [==============================] - 9s 153ms/step - loss: 3.9768 - accuracy: 0.1065 - val_loss: 3.7856 - val_accuracy: 0.1517
-Epoch 2/20
-61/61 [==============================] - ETA: 0s - loss: 3.4880 - accuracy: 0.1644
-Epoch 00002: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 3.4880 - accuracy: 0.1644 - val_loss: 3.0998 - val_accuracy: 0.1292
-Epoch 3/20
-61/61 [==============================] - ETA: 0s - loss: 2.9568 - accuracy: 0.1582
-Epoch 00003: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.9568 - accuracy: 0.1582 - val_loss: 2.8064 - val_accuracy: 0.1292
-Epoch 4/20
-61/61 [==============================] - ETA: 0s - loss: 2.8155 - accuracy: 0.1644
-Epoch 00004: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.8155 - accuracy: 0.1644 - val_loss: 2.7578 - val_accuracy: 0.1292
-Epoch 5/20
-61/61 [==============================] - ETA: 0s - loss: 2.8019 - accuracy: 0.1696
-Epoch 00005: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 145ms/step - loss: 2.8019 - accuracy: 0.1696 - val_loss: 2.7435 - val_accuracy: 0.1292
-Epoch 6/20
-61/61 [==============================] - ETA: 0s - loss: 2.7949 - accuracy: 0.1624
-Epoch 00006: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 145ms/step - loss: 2.7949 - accuracy: 0.1624 - val_loss: 2.7443 - val_accuracy: 0.1348
-Epoch 7/20
-61/61 [==============================] - ETA: 0s - loss: 2.7894 - accuracy: 0.1665
-Epoch 00007: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.7894 - accuracy: 0.1665 - val_loss: 2.8374 - val_accuracy: 0.1404
-Epoch 8/20
-61/61 [==============================] - ETA: 0s - loss: 2.7795 - accuracy: 0.1634
-Epoch 00008: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.7795 - accuracy: 0.1634 - val_loss: 2.9204 - val_accuracy: 0.0955
-Epoch 9/20
-61/61 [==============================] - ETA: 0s - loss: 2.7831 - accuracy: 0.1603
-Epoch 00009: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 143ms/step - loss: 2.7831 - accuracy: 0.1603 - val_loss: 2.7736 - val_accuracy: 0.1404
-Epoch 10/20
-61/61 [==============================] - ETA: 0s - loss: 2.7696 - accuracy: 0.1572
-Epoch 00010: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.7696 - accuracy: 0.1572 - val_loss: 2.7337 - val_accuracy: 0.1292
-Epoch 11/20
-61/61 [==============================] - ETA: 0s - loss: 2.7615 - accuracy: 0.1541
-Epoch 00011: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.7615 - accuracy: 0.1541 - val_loss: 2.8126 - val_accuracy: 0.1348
-Epoch 12/20
-61/61 [==============================] - ETA: 0s - loss: 2.7549 - accuracy: 0.1551
-Epoch 00012: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.7549 - accuracy: 0.1551 - val_loss: 3.0824 - val_accuracy: 0.0955
-Epoch 13/20
-61/61 [==============================] - ETA: 0s - loss: 2.7527 - accuracy: 0.1624
-Epoch 00013: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 145ms/step - loss: 2.7527 - accuracy: 0.1624 - val_loss: 4.6334 - val_accuracy: 0.0056
-Epoch 14/20
-61/61 [==============================] - ETA: 0s - loss: 2.7476 - accuracy: 0.1665
-Epoch 00014: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.7476 - accuracy: 0.1665 - val_loss: 4.1155 - val_accuracy: 0.0674
-Epoch 15/20
-61/61 [==============================] - ETA: 0s - loss: 2.7526 - accuracy: 0.1717
-Epoch 00015: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.7526 - accuracy: 0.1717 - val_loss: 3.0204 - val_accuracy: 0.0843
-Epoch 16/20
-61/61 [==============================] - ETA: 0s - loss: 2.7378 - accuracy: 0.1603
-Epoch 00016: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.7378 - accuracy: 0.1603 - val_loss: 3.2800 - val_accuracy: 0.1067
-Epoch 17/20
-61/61 [==============================] - ETA: 0s - loss: 2.7528 - accuracy: 0.1572
-Epoch 00017: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.7528 - accuracy: 0.1572 - val_loss: 4.1204 - val_accuracy: 0.0000e+00
-Epoch 18/20
-61/61 [==============================] - ETA: 0s - loss: 2.7451 - accuracy: 0.1634
-Epoch 00018: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.7451 - accuracy: 0.1634 - val_loss: 3.7334 - val_accuracy: 0.1236
-Epoch 19/20
-61/61 [==============================] - ETA: 0s - loss: 2.7266 - accuracy: 0.1593
-Epoch 00019: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 145ms/step - loss: 2.7266 - accuracy: 0.1593 - val_loss: 3.2848 - val_accuracy: 0.0955
-Epoch 20/20
-61/61 [==============================] - ETA: 0s - loss: 2.7366 - accuracy: 0.1737
-Epoch 00020: val_accuracy did not improve from 0.15169
-61/61 [==============================] - 9s 144ms/step - loss: 2.7366 - accuracy: 0.1737 - val_loss: 12.9909 - val_accuracy: 0.0169
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[54]:</div>
+    <div class="prompt output_prompt">Out[11]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;tensorflow.python.keras.callbacks.History at 0x204c1f0ca08&gt;</pre>
+<pre>[{&#39;note&#39;: 67, &#39;currentTime&#39;: 0.9830729166666666},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 1.7838541666666665},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 1.8098958333333333},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 1.90625},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 2.1471354166666665},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 2.153645833333333},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 2.178385416666666},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 2.1809895833333326},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 3.1601562499999996},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 3.243489583333333},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 3.6002604166666665},
+ {&#39;note&#39;: 79, &#39;currentTime&#39;: 4.098958333333333},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 4.32421875},
+ {&#39;note&#39;: 79, &#39;currentTime&#39;: 4.419270833333333},
+ {&#39;note&#39;: 79, &#39;currentTime&#39;: 4.744791666666666},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 4.761718749999999},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 4.764322916666666},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 4.778645833333332},
+ {&#39;note&#39;: 79, &#39;currentTime&#39;: 5.134114583333332},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 5.205729166666665},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 5.247395833333332},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 5.287760416666665},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 5.326822916666665},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 5.410156249999998},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 5.541666666666665},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 5.552083333333332},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 5.554687499999999},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 5.569010416666666},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 5.821614583333332},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 5.882812499999999},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 5.910156249999999},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 5.925781249999999},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 6.026041666666666},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 6.311197916666666},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 6.320312499999999},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 6.324218749999999},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 6.328124999999999},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 6.354166666666666},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 6.945312499999999},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 6.973958333333332},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 6.993489583333332},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 7.114583333333332},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 7.420572916666665},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 7.518229166666665},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 7.658854166666664},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 7.667968749999997},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 7.707031249999997},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 8.143229166666664},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 8.156249999999998},
+ {&#39;note&#39;: 42, &#39;currentTime&#39;: 8.164062499999998},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 8.240885416666666},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 8.604166666666668},
+ {&#39;note&#39;: 42, &#39;currentTime&#39;: 9.035156250000004},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 9.238281250000004},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 9.343750000000004},
+ {&#39;note&#39;: 35, &#39;currentTime&#39;: 9.843750000000005},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 9.86067708333334},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 9.867187500000005},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 10.006510416666673},
+ {&#39;note&#39;: 35, &#39;currentTime&#39;: 10.69140625000001},
+ {&#39;note&#39;: 42, &#39;currentTime&#39;: 11.458333333333348},
+ {&#39;note&#39;: 42, &#39;currentTime&#39;: 11.997395833333346},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 12.55338541666668},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 13.329427083333352},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 13.55468750000002},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 13.963541666666687},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 14.531250000000021},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 15.139322916666691},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 15.144531250000025},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 15.358072916666693},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 15.557291666666693},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 15.666666666666693},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 15.739583333333359},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 15.751302083333359},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 15.829427083333359},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 16.20833333333336},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 16.222656250000025},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 16.222656250000025},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 16.222656250000025},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 16.269531250000025},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 16.669270833333353},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 17.014322916666682},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 17.088541666666682},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 17.132812500000014},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 17.22135416666668},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 17.329427083333346},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 17.567708333333346},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 17.605468750000014},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 17.619791666666682},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 17.72395833333335},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 17.73567708333335},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 17.777343750000014},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 17.781250000000014},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 17.94401041666668},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 17.94401041666668},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 17.95703125000001},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 17.96875000000001},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 18.315104166666675},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 18.377604166666675},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 18.380208333333343},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 18.381510416666675},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 18.463541666666675},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 18.648437500000007},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 18.652343750000007},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 18.66536458333334},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 18.679687500000007},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 18.682291666666675},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 18.691406250000007},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 18.829427083333343},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 18.872395833333343},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 18.988281250000007},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 19.139322916666675},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 19.212239583333343},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 19.361979166666675},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 19.437500000000007},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 19.453125000000007},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 19.46223958333334},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 19.47005208333334},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 19.85416666666667},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 19.992187500000004},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 20.005208333333336},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 20.011718750000004},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 20.07291666666667},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 20.113281250000004},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 20.187500000000004},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 20.192708333333336},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 20.257812500000004},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 20.294270833333336},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 20.46875},
+ {&#39;note&#39;: 82, &#39;currentTime&#39;: 20.502604166666668},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 20.509114583333336},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 20.802083333333336},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 20.812500000000004},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 20.837239583333336},
+ {&#39;note&#39;: 82, &#39;currentTime&#39;: 20.953125},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 21.091145833333332},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 21.095052083333332},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 21.109375},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 21.127604166666668},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 21.213541666666668},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 21.227864583333336},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 21.266927083333336},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 21.272135416666668},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 21.450520833333336},
+ {&#39;note&#39;: 85, &#39;currentTime&#39;: 21.466145833333336},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 21.479166666666668},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 21.489583333333336},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 21.71354166666667},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 21.72135416666667},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 21.734375000000004},
+ {&#39;note&#39;: 85, &#39;currentTime&#39;: 21.817708333333336},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 21.829427083333336},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 21.834635416666668},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 21.8671875},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 21.872395833333332},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 21.924479166666664},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 21.979166666666664},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 21.997395833333332},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 22.002604166666664},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 22.18098958333333},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 22.183593749999996},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 22.21354166666666},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 22.23697916666666},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 22.339843749999993},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 22.355468749999993},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 22.40104166666666},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 22.41666666666666},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 22.57161458333333},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 22.58854166666666},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 22.66666666666666},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 22.69010416666666},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 22.742187499999993},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 22.755208333333325},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 22.983072916666657},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 22.989583333333325},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 22.998697916666657},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 23.024739583333325},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 23.027343749999993},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 23.040364583333325},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 23.127604166666657},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 23.12890624999999},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 23.29036458333332},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 23.296874999999986},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 23.307291666666654},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 23.322916666666654},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 23.365885416666654},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 23.382812499999986},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 23.401041666666654},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 23.402343749999986},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 23.618489583333318},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 23.626302083333318},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 23.63932291666665},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 23.667968749999982},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 23.67447916666665},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 23.677083333333318},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 23.710937499999986},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 23.744791666666654},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 24.00520833333332},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 24.00781249999999},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 24.01692708333332},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 24.018229166666654},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 24.028645833333318},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 24.113281249999982},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 24.117187499999982},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 24.140624999999982},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 24.388020833333314},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 24.395833333333314},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 24.415364583333314},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 24.496093749999982},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 24.513020833333314},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 24.523437499999982},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 24.90494791666665},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 24.914062499999982},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 24.914062499999982},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 24.92447916666665},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 24.949218749999982},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 24.964843749999982},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 24.970052083333314},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 24.970052083333314},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 25.269531249999982},
+ {&#39;note&#39;: 40, &#39;currentTime&#39;: 25.503906249999982},
+ {&#39;note&#39;: 28, &#39;currentTime&#39;: 25.523437499999982},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 25.664062499999982},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 25.845052083333314},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 26.082031249999982},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 26.093749999999982},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 26.101562499999982},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 26.475260416666647},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 26.506510416666647},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 26.522135416666647},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 26.537760416666647},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 26.631510416666647},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 26.829427083333314},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 26.845052083333314},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 26.850260416666647},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 26.858072916666647},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 26.934895833333314},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 27.139322916666647},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 27.18359374999998},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 27.19140624999998},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 27.23828124999998},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 27.330729166666647},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 27.666666666666647},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 27.68749999999998},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 27.68749999999998},
+ {&#39;note&#39;: 40, &#39;currentTime&#39;: 27.808593749999975},
+ {&#39;note&#39;: 28, &#39;currentTime&#39;: 27.828124999999975},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 28.15624999999997},
+ {&#39;note&#39;: 33, &#39;currentTime&#39;: 28.17838541666664},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 28.341145833333307},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 28.34244791666664},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 28.38281249999997},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 28.45312499999997},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 28.598958333333304},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 28.626302083333304},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 28.631510416666636},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 28.992187499999964},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 28.992187499999964},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 29.085937499999964},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 29.263020833333297},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 29.450520833333297},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 29.454427083333297},
+ {&#39;note&#39;: 33, &#39;currentTime&#39;: 29.696614583333293},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 29.891927083333293},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 30.06380208333329},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 30.164062499999957},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 30.249999999999957},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 30.35807291666662},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 30.38541666666662},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 30.42447916666662},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 30.449218749999954},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 30.90494791666662},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 30.92838541666662},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 31.082031249999954},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 31.19401041666662},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 31.503906249999957},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 31.94661458333329},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 32.19921874999995},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 32.391927083333286},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 32.74869791666663},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 33.117187499999964},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 33.47265624999997},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 33.97656249999998},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 34.01171874999998},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 34.03906249999998},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 34.35546874999998},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 34.37369791666664},
+ {&#39;note&#39;: 38, &#39;currentTime&#39;: 34.76953124999998},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 34.85156249999998},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 34.860677083333314},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 34.86588541666665},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 35.23307291666665},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 35.243489583333314},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 35.325520833333314},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 35.503906249999986},
+ {&#39;note&#39;: 38, &#39;currentTime&#39;: 35.50520833333332},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 35.54166666666666},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 35.55598958333332},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 35.624999999999986},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 35.69661458333332},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 35.79427083333332},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 35.96744791666666},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 36.00781249999999},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 36.30989583333333},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 36.32421874999999},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 36.338541666666664},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 36.35156249999999},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 36.36588541666666},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 36.51692708333333},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 36.53645833333333},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 36.561197916666664},
+ {&#39;note&#39;: 32, &#39;currentTime&#39;: 36.57161458333333},
+ {&#39;note&#39;: 32, &#39;currentTime&#39;: 36.686197916666664},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 36.70442708333333},
+ {&#39;note&#39;: 35, &#39;currentTime&#39;: 36.733072916666664},
+ {&#39;note&#39;: 35, &#39;currentTime&#39;: 36.873697916666664},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 36.89973958333333},
+ {&#39;note&#39;: 42, &#39;currentTime&#39;: 36.90234374999999},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 36.91536458333333},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 36.92838541666666},
+ {&#39;note&#39;: 42, &#39;currentTime&#39;: 36.94661458333332},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 36.96614583333332},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 37.00651041666666},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 37.08723958333332},
+ {&#39;note&#39;: 38, &#39;currentTime&#39;: 37.113281249999986},
+ {&#39;note&#39;: 38, &#39;currentTime&#39;: 37.22526041666665},
+ {&#39;note&#39;: 46, &#39;currentTime&#39;: 37.238281249999986},
+ {&#39;note&#39;: 46, &#39;currentTime&#39;: 37.30208333333332},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 37.46484374999999},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 37.48177083333333},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 37.48697916666666},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 37.48958333333332},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 37.63020833333332},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 37.660156249999986},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 37.829427083333314},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 38.01953124999998},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 38.02994791666664},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 38.03385416666664},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 38.03906249999998},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 38.044270833333314},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 38.14192708333332},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 38.14322916666666},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 38.23307291666666},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 38.62760416666666},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 38.63151041666666},
+ {&#39;note&#39;: 41, &#39;currentTime&#39;: 38.65494791666666},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 38.71484374999999},
+ {&#39;note&#39;: 41, &#39;currentTime&#39;: 38.78906249999999},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 38.86197916666666},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 38.93749999999999},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 39.03255208333333},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 39.05989583333333},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 39.08203124999999},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 39.10807291666666},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 39.17578124999999},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 39.18489583333333},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 39.186197916666664},
+ {&#39;note&#39;: 39, &#39;currentTime&#39;: 39.18880208333333},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 39.19140624999999},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 39.303385416666664},
+ {&#39;note&#39;: 39, &#39;currentTime&#39;: 39.328125},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 39.329427083333336},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 39.595052083333336},
+ {&#39;note&#39;: 40, &#39;currentTime&#39;: 39.6328125},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 39.684895833333336},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 39.703125},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 39.713541666666664},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 39.73828124999999},
+ {&#39;note&#39;: 40, &#39;currentTime&#39;: 39.776041666666664},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 39.98958333333333},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 40.00520833333333},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 40.033854166666664},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 40.0859375},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 40.1015625},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 40.216145833333336},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 40.24609375},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 40.248697916666664},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 40.25390625},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 40.513020833333336},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 40.513020833333336},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 40.56510416666667},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 40.645833333333336},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 40.80338541666667},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 40.82031250000001},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 40.86458333333334},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 40.89062500000001},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 40.97786458333334},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 41.10156250000001},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 41.10937500000001},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 41.32031250000001},
+ {&#39;note&#39;: 83, &#39;currentTime&#39;: 41.34895833333334},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 41.36328125000001},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 41.36848958333334},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 41.37109375000001},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 41.37890625000001},
+ {&#39;note&#39;: 44, &#39;currentTime&#39;: 41.38281250000001},
+ {&#39;note&#39;: 83, &#39;currentTime&#39;: 41.50781250000001},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 41.52083333333334},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 41.52864583333334},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 41.61979166666668},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 41.66145833333334},
+ {&#39;note&#39;: 44, &#39;currentTime&#39;: 41.67838541666668},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 41.92447916666668},
+ {&#39;note&#39;: 46, &#39;currentTime&#39;: 41.93229166666668},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 41.94010416666668},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 41.94791666666668},
+ {&#39;note&#39;: 46, &#39;currentTime&#39;: 42.07942708333334},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 42.14453125000001},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 42.22786458333334},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 42.24088541666668},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 42.29817708333334},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 42.31250000000001},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 42.36848958333334},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 42.51041666666668},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 42.51302083333334},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 42.51822916666668},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 42.52083333333334},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 42.54427083333334},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 42.58203125000001},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 42.62239583333334},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 42.62369791666668},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 42.62760416666668},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 42.66536458333334},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 42.72395833333334},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 42.80859375000001},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 42.85807291666667},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 42.884114583333336},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 42.91666666666667},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 42.934895833333336},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 42.97135416666667},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 43.02604166666667},
+ {&#39;note&#39;: 80, &#39;currentTime&#39;: 43.12369791666667},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 43.141927083333336},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 43.158854166666664},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 43.240885416666664},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 43.33984375},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 43.34765625},
+ {&#39;note&#39;: 80, &#39;currentTime&#39;: 43.404947916666664},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 43.412760416666664},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 43.533854166666664},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 43.65234375},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 43.889322916666664},
+ {&#39;note&#39;: 79, &#39;currentTime&#39;: 43.94921875},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 43.95703125},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 43.958333333333336},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 43.96354166666667},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 43.98046875000001},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 44.13281250000001},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 44.16145833333334},
+ {&#39;note&#39;: 79, &#39;currentTime&#39;: 44.24739583333334},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 44.31640625000001},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 44.34375000000001},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 44.94661458333335},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 44.98958333333336},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 45.24218750000003},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 45.34505208333336},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 45.37500000000003},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 45.419270833333364},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 45.81640625000003},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 45.82812500000003},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 45.829427083333364},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 45.829427083333364},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 45.841145833333364},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 45.87890625000003},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 46.188802083333364},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 46.2682291666667},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 46.37500000000004},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 46.70833333333338},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 46.71484375000004},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 46.72786458333338},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 47.07421875000005},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 47.18229166666672},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 47.227864583333385},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 47.337239583333385},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 47.35416666666672},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 47.52343750000005},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 47.529947916666714},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 47.529947916666714},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 47.549479166666714},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 47.623697916666714},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 47.768229166666714},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 47.80208333333338},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 47.838541666666714},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 47.90755208333338},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 48.045572916666714},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 48.20833333333338},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 48.22005208333338},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 48.22786458333338},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 48.229166666666714},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 48.33984375000005},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 48.45312500000005},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 48.485677083333385},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 48.56250000000005},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 48.583333333333385},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 48.62369791666672},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 48.76171875000006},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 48.88932291666672},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 48.90234375000006},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 48.92968750000006},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 48.94010416666672},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 49.11197916666673},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 49.335937500000064},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 49.44401041666673},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 49.48697916666673},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 49.50651041666673},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 49.58984375000006},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 49.61718750000006},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 49.61718750000006},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 49.62369791666672},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 49.69140625000005},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 49.76171875000005},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 49.795572916666714},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 49.94140625000005},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 50.092447916666714},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 50.32161458333338},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 50.36718750000004},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 50.36848958333338},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 50.41536458333338},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 50.424479166666714},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 50.43489583333338},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 50.55208333333338},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 50.666666666666714},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 50.66927083333338},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 50.69531250000004},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 50.70703125000004},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 50.71223958333338},
+ {&#39;note&#39;: 43, &#39;currentTime&#39;: 50.83984375000004},
+ {&#39;note&#39;: 43, &#39;currentTime&#39;: 50.87369791666671},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 50.88411458333337},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 51.18619791666671},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 51.32552083333337},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 51.35416666666671},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 51.51953125000004},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 51.795572916666714},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 51.936197916666714},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 52.006510416666714},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 52.01692708333338},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 52.03645833333338},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 52.17317708333338},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 52.17578125000004},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 52.49348958333337},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 52.50130208333337},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 52.54036458333337},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 52.56770833333337},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 52.60416666666671},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 52.75130208333337},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 53.023437500000036},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 53.0260416666667},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 53.044270833333364},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 53.06250000000003},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 53.06901041666669},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 53.13020833333336},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 53.14843750000002},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 53.22786458333336},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 53.28515625000002},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 53.32161458333336},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 53.33203125000002},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 53.48958333333336},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 53.55598958333336},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 53.58333333333336},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 53.60156250000002},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 53.68750000000002},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 53.740885416666686},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 53.77864583333335},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 53.858072916666686},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 53.865885416666686},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 53.865885416666686},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 54.08723958333336},
+ {&#39;note&#39;: 46, &#39;currentTime&#39;: 54.10937500000002},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 54.11458333333336},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 54.12369791666669},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 54.12890625000003},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 54.130208333333364},
+ {&#39;note&#39;: 46, &#39;currentTime&#39;: 54.15234375000003},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 54.21484375000003},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 54.231770833333364},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 54.3697916666667},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 54.3815104166667},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 54.4049479166667},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 54.5221354166667},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 54.574218750000036},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 54.5885416666667},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 54.621093750000036},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 54.679687500000036},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 54.6822916666667},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 54.808593750000036},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 54.832031250000036},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 54.832031250000036},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 54.8385416666667},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 54.856770833333364},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 54.860677083333364},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 54.880208333333364},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 54.93619791666669},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 55.00000000000003},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 55.02734375000003},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 55.055989583333364},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 55.0768229166667},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 55.083333333333364},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 55.1158854166667},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 55.175781250000036},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 55.1822916666667},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 55.207031250000036},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 55.3229166666667},
+ {&#39;note&#39;: 80, &#39;currentTime&#39;: 55.3307291666667},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 55.333333333333364},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 55.3502604166667},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 55.352864583333364},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 55.3541666666667},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 55.384114583333364},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 55.3971354166667},
+ {&#39;note&#39;: 80, &#39;currentTime&#39;: 55.42708333333337},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 55.44921875000004},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 55.45833333333337},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 55.53645833333337},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 55.53776041666671},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 55.54166666666671},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 55.61979166666671},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 55.62239583333337},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 55.628906250000036},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 55.644531250000036},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 55.800781250000036},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 55.8111979166667},
+ {&#39;note&#39;: 80, &#39;currentTime&#39;: 55.813802083333364},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 55.8268229166667},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 55.86328125000003},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 56.02213541666669},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 56.05598958333336},
+ {&#39;note&#39;: 80, &#39;currentTime&#39;: 56.06250000000002},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 56.30989583333336},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 56.31119791666669},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 56.32942708333336},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 56.33072916666669},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 56.348958333333364},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 56.515625000000036},
+ {&#39;note&#39;: 87, &#39;currentTime&#39;: 56.55989583333337},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 56.57552083333337},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 56.64322916666671},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 56.68489583333337},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 56.73958333333337},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 56.74348958333337},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 56.79557291666671},
+ {&#39;note&#39;: 83, &#39;currentTime&#39;: 56.85026041666671},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 56.85286458333337},
+ {&#39;note&#39;: 87, &#39;currentTime&#39;: 56.85286458333337},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 56.86067708333337},
+ {&#39;note&#39;: 79, &#39;currentTime&#39;: 57.10807291666671},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 57.14713541666671},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 57.16927083333337},
+ {&#39;note&#39;: 79, &#39;currentTime&#39;: 57.17708333333337},
+ {&#39;note&#39;: 83, &#39;currentTime&#39;: 57.19010416666671},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 57.24479166666671},
+ {&#39;note&#39;: 89, &#39;currentTime&#39;: 57.48567708333337},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 57.49348958333337},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 57.4986979166667},
+ {&#39;note&#39;: 82, &#39;currentTime&#39;: 57.5065104166667},
+ {&#39;note&#39;: 82, &#39;currentTime&#39;: 57.59895833333337},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 57.61067708333337},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 57.6705729166667},
+ {&#39;note&#39;: 87, &#39;currentTime&#39;: 57.718750000000036},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 57.7643229166667},
+ {&#39;note&#39;: 87, &#39;currentTime&#39;: 57.829427083333364},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 57.8658854166667},
+ {&#39;note&#39;: 89, &#39;currentTime&#39;: 57.8932291666667},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 57.934895833333364},
+ {&#39;note&#39;: 87, &#39;currentTime&#39;: 57.99609375000003},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 58.052083333333364},
+ {&#39;note&#39;: 87, &#39;currentTime&#39;: 58.2447916666667},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 58.343750000000036},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 58.3776041666667},
+ {&#39;note&#39;: 94, &#39;currentTime&#39;: 58.391927083333364},
+ {&#39;note&#39;: 82, &#39;currentTime&#39;: 58.3932291666667},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 58.3971354166667},
+ {&#39;note&#39;: 90, &#39;currentTime&#39;: 58.4010416666667},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 58.4049479166667},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 58.800781250000036},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 58.816406250000036},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 58.843750000000036},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 58.84505208333337},
+ {&#39;note&#39;: 82, &#39;currentTime&#39;: 58.88802083333337},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 58.933593750000036},
+ {&#39;note&#39;: 94, &#39;currentTime&#39;: 58.9557291666667},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 58.957031250000036},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 58.964843750000036},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 58.9869791666667},
+ {&#39;note&#39;: 90, &#39;currentTime&#39;: 58.9947916666667},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 59.003906250000036},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 59.054687500000036},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 59.0651041666667},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 59.091145833333364},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 59.1080729166667},
+ {&#39;note&#39;: 48, &#39;currentTime&#39;: 59.1236979166667},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 59.1393229166667},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 59.148437500000036},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 59.191406250000036},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 59.410156250000036},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 59.4205729166667},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 59.438802083333364},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 59.45312500000003},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 59.76822916666669},
+ {&#39;note&#39;: 92, &#39;currentTime&#39;: 59.77734375000003},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 59.778645833333364},
+ {&#39;note&#39;: 80, &#39;currentTime&#39;: 59.778645833333364},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 59.782552083333364},
+ {&#39;note&#39;: 90, &#39;currentTime&#39;: 59.78515625000003},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 59.83072916666669},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 59.83203125000003},
+ {&#39;note&#39;: 80, &#39;currentTime&#39;: 59.985677083333364},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 60.03906250000003},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 60.04687500000003},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 60.067708333333364},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 60.079427083333364},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 60.09765625000003},
+ {&#39;note&#39;: 92, &#39;currentTime&#39;: 60.15494791666669},
+ {&#39;note&#39;: 90, &#39;currentTime&#39;: 60.20182291666669},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 60.20442708333336},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 60.20963541666669},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 60.22786458333336},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 60.23046875000002},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 60.24609375000002},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 60.299479166666686},
+ {&#39;note&#39;: 80, &#39;currentTime&#39;: 60.502604166666686},
+ {&#39;note&#39;: 92, &#39;currentTime&#39;: 60.51171875000002},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 60.514322916666686},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 60.518229166666686},
+ {&#39;note&#39;: 85, &#39;currentTime&#39;: 60.52473958333335},
+ {&#39;note&#39;: 80, &#39;currentTime&#39;: 60.52864583333335},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 60.54427083333335},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 60.89453125000002},
+ {&#39;note&#39;: 44, &#39;currentTime&#39;: 60.91927083333336},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 60.94661458333336},
+ {&#39;note&#39;: 44, &#39;currentTime&#39;: 60.96223958333336},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 61.00911458333336},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 61.03125000000002},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 61.065104166666686},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 61.06640625000002},
+ {&#39;note&#39;: 92, &#39;currentTime&#39;: 61.14192708333336},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 61.14453125000002},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 61.15364583333336},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 61.18880208333336},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 61.20182291666669},
+ {&#39;note&#39;: 85, &#39;currentTime&#39;: 61.23828125000003},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 61.44401041666669},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 61.47656250000003},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 61.48697916666669},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 61.50911458333336},
+ {&#39;note&#39;: 49, &#39;currentTime&#39;: 61.52604166666669},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 61.83854166666669},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 61.85416666666669},
+ {&#39;note&#39;: 90, &#39;currentTime&#39;: 61.86588541666669},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 61.87109375000003},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 61.87760416666669},
+ {&#39;note&#39;: 82, &#39;currentTime&#39;: 61.88281250000003},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 61.90234375000003},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 61.91276041666669},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 61.91406250000003},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 61.92968750000003},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 62.00781250000003},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 62.07421875000003},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 62.08593750000003},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 62.10156250000003},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 62.10807291666669},
+ {&#39;note&#39;: 82, &#39;currentTime&#39;: 62.13671875000003},
+ {&#39;note&#39;: 90, &#39;currentTime&#39;: 62.16796875000003},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 62.177083333333364},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 62.23046875000003},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 62.24479166666669},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 62.26692708333336},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 62.28125000000002},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 62.41145833333336},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 62.50651041666669},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 62.57812500000003},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 62.602864583333364},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 62.60937500000003},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 62.63671875000003},
+ {&#39;note&#39;: 83, &#39;currentTime&#39;: 62.64322916666669},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 62.67838541666669},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 62.70052083333336},
+ {&#39;note&#39;: 88, &#39;currentTime&#39;: 62.75781250000002},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 62.76302083333336},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 62.79817708333336},
+ {&#39;note&#39;: 83, &#39;currentTime&#39;: 62.80468750000002},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 63.11718750000002},
+ {&#39;note&#39;: 85, &#39;currentTime&#39;: 63.13281250000002},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 63.15234375000002},
+ {&#39;note&#39;: 85, &#39;currentTime&#39;: 63.27734375000002},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 63.490885416666686},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 63.54687500000002},
+ {&#39;note&#39;: 88, &#39;currentTime&#39;: 63.59375000000002},
+ {&#39;note&#39;: 78, &#39;currentTime&#39;: 63.70442708333336},
+ {&#39;note&#39;: 82, &#39;currentTime&#39;: 63.79296875000002},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 63.81250000000002},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 63.89583333333336},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 63.94921875000002},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 63.96223958333336},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 63.97656250000002},
+ {&#39;note&#39;: 82, &#39;currentTime&#39;: 63.990885416666686},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 63.99609375000002},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 64.04817708333336},
+ {&#39;note&#39;: 74, &#39;currentTime&#39;: 64.10937500000003},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 64.3072916666667},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 64.3072916666667},
+ {&#39;note&#39;: 85, &#39;currentTime&#39;: 64.32161458333337},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 64.3463541666667},
+ {&#39;note&#39;: 86, &#39;currentTime&#39;: 64.35546875000003},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 64.3854166666667},
+ {&#39;note&#39;: 85, &#39;currentTime&#39;: 64.49348958333337},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 64.68489583333337},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 64.80598958333337},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 64.80859375000004},
+ {&#39;note&#39;: 83, &#39;currentTime&#39;: 64.89583333333337},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 64.91796875000004},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 64.93229166666671},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 65.09375000000004},
+ {&#39;note&#39;: 83, &#39;currentTime&#39;: 65.11588541666671},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 65.24739583333339},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 65.27343750000006},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 65.31510416666673},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 65.3294270833334},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 65.36979166666673},
+ {&#39;note&#39;: 81, &#39;currentTime&#39;: 65.39322916666673},
+ {&#39;note&#39;: 85, &#39;currentTime&#39;: 65.59635416666673},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 65.61328125000006},
+ {&#39;note&#39;: 85, &#39;currentTime&#39;: 65.62760416666673},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 65.64062500000006},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 65.70312500000006},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 65.71093750000006},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 65.71614583333339},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 65.75000000000006},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 65.76432291666673},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 65.7747395833334},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 65.82682291666673},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 65.85026041666673},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 65.85416666666673},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 65.88281250000006},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 66.04427083333339},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 66.05859375000006},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 66.09895833333339},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 66.10546875000006},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 66.44531250000006},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 66.44661458333339},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 66.46614583333339},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 66.86848958333337},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 67.04296875000003},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 67.04687500000003},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 67.2291666666667},
+ {&#39;note&#39;: 72, &#39;currentTime&#39;: 67.38151041666671},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 67.45312500000004},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 67.45442708333337},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 67.47656250000004},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 67.54296875000004},
+ {&#39;note&#39;: 59, &#39;currentTime&#39;: 67.54817708333337},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 67.62890625000003},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 67.66015625000003},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 67.71223958333337},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 67.72005208333337},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 67.7369791666667},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 67.75000000000003},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 67.78125000000003},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 68.1080729166667},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 68.12630208333337},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 68.1940104166667},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 68.2252604166667},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 68.52083333333336},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 68.90234375},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 69.00130208333333},
+ {&#39;note&#39;: 42, &#39;currentTime&#39;: 69.3203125},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 69.47526041666666},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 69.50390624999999},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 69.51692708333331},
+ {&#39;note&#39;: 42, &#39;currentTime&#39;: 69.52083333333331},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 69.72786458333331},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 69.75911458333331},
+ {&#39;note&#39;: 41, &#39;currentTime&#39;: 69.9114583333333},
+ {&#39;note&#39;: 41, &#39;currentTime&#39;: 70.33593749999996},
+ {&#39;note&#39;: 46, &#39;currentTime&#39;: 70.37499999999996},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 70.64062499999996},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 70.80859374999996},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 70.84505208333329},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 70.96093749999996},
+ {&#39;note&#39;: 41, &#39;currentTime&#39;: 71.21223958333327},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 71.54036458333326},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 71.55468749999993},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 71.5690104166666},
+ {&#39;note&#39;: 41, &#39;currentTime&#39;: 71.62499999999994},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 71.7565104166666},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 72.03645833333326},
+ {&#39;note&#39;: 46, &#39;currentTime&#39;: 72.16666666666659},
+ {&#39;note&#39;: 56, &#39;currentTime&#39;: 72.72526041666657},
+ {&#39;note&#39;: 40, &#39;currentTime&#39;: 72.7851562499999},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 72.82682291666657},
+ {&#39;note&#39;: 40, &#39;currentTime&#39;: 73.23177083333324},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 73.60286458333324},
+ {&#39;note&#39;: 50, &#39;currentTime&#39;: 73.75911458333324},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 74.30468749999991},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 75.01171874999991},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 75.04687499999991},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 75.05078124999991},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 75.07291666666659},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 75.25130208333326},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 75.48437499999993},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 75.66406249999993},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 75.6901041666666},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 76.1979166666666},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 76.32942708333327},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 76.64192708333327},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 76.9401041666666},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 76.95052083333326},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 76.97395833333326},
+ {&#39;note&#39;: 76, &#39;currentTime&#39;: 77.06119791666659},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 77.64192708333323},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 77.91666666666656},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 77.93359374999989},
+ {&#39;note&#39;: 70, &#39;currentTime&#39;: 77.97135416666656},
+ {&#39;note&#39;: 62, &#39;currentTime&#39;: 77.98828124999989},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 78.38151041666656},
+ {&#39;note&#39;: 54, &#39;currentTime&#39;: 78.52604166666656},
+ {&#39;note&#39;: 71, &#39;currentTime&#39;: 78.60546874999989},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 78.87109374999989},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 78.88671874999989},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 78.93229166666656},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 79.03124999999989},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 79.20052083333321},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 79.37890624999989},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 79.45312499999989},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 79.78124999999989},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 79.95182291666656},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 80.19140624999989},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 80.20442708333321},
+ {&#39;note&#39;: 77, &#39;currentTime&#39;: 80.54947916666654},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 80.56249999999987},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 80.9231770833332},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 81.2317708333332},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 81.2395833333332},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 81.39713541666653},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 81.47265624999986},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 81.47265624999986},
+ {&#39;note&#39;: 53, &#39;currentTime&#39;: 81.47656249999986},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 81.63541666666653},
+ {&#39;note&#39;: 75, &#39;currentTime&#39;: 81.7864583333332},
+ {&#39;note&#39;: 73, &#39;currentTime&#39;: 81.7903645833332},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 81.7942708333332},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 81.79947916666653},
+ {&#39;note&#39;: 65, &#39;currentTime&#39;: 81.84244791666653},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 82.11067708333319},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 82.12239583333319},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 82.12369791666652},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 82.12890624999984},
+ {&#39;note&#39;: 63, &#39;currentTime&#39;: 82.4908854166665},
+ {&#39;note&#39;: 45, &#39;currentTime&#39;: 82.4947916666665},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 82.54036458333317},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 82.59635416666652},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 82.7877604166665},
+ {&#39;note&#39;: 43, &#39;currentTime&#39;: 83.0768229166665},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 83.0807291666665},
+ {&#39;note&#39;: 64, &#39;currentTime&#39;: 83.19140624999983},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 83.37499999999983},
+ {&#39;note&#39;: 43, &#39;currentTime&#39;: 83.45052083333316},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 83.90234374999982},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 84.04817708333314},
+ {&#39;note&#39;: 42, &#39;currentTime&#39;: 84.07942708333314},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 84.12369791666647},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 84.1718749999998},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 84.50651041666647},
+ {&#39;note&#39;: 69, &#39;currentTime&#39;: 84.7695312499998},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 85.08723958333313},
+ {&#39;note&#39;: 42, &#39;currentTime&#39;: 85.4817708333331},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 86.10546874999977},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 86.54687499999977},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 86.89843749999977},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 87.2473958333331},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 87.42317708333309},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 87.49609374999976},
+ {&#39;note&#39;: 51, &#39;currentTime&#39;: 87.70182291666642},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 87.82812499999974},
+ {&#39;note&#39;: 61, &#39;currentTime&#39;: 87.88411458333307},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 88.14062499999973},
+ {&#39;note&#39;: 66, &#39;currentTime&#39;: 88.20052083333306},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 88.21223958333306},
+ {&#39;note&#39;: 68, &#39;currentTime&#39;: 88.39583333333304},
+ {&#39;note&#39;: 60, &#39;currentTime&#39;: 88.52213541666637},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 88.5390624999997},
+ {&#39;note&#39;: 40, &#39;currentTime&#39;: 89.14843749999969},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 89.20833333333302},
+ {&#39;note&#39;: 57, &#39;currentTime&#39;: 89.21484374999969},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 89.25130208333302},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 89.25911458333302},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 89.27083333333302},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 89.54166666666634},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 89.64453124999969},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 89.67317708333302},
+ {&#39;note&#39;: 47, &#39;currentTime&#39;: 89.75651041666634},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 89.81249999999967},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 89.81640624999967},
+ {&#39;note&#39;: 58, &#39;currentTime&#39;: 89.92578124999967},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 90.036458333333},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 90.13151041666633},
+ {&#39;note&#39;: 67, &#39;currentTime&#39;: 90.243489583333},
+ {&#39;note&#39;: 52, &#39;currentTime&#39;: 90.247395833333},
+ {&#39;note&#39;: 46, &#39;currentTime&#39;: 90.25781249999967},
+ {&#39;note&#39;: 55, &#39;currentTime&#39;: 90.30338541666634},
+ ...]</pre>
 </div>
 
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[71]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_train</span><span class="p">))</span>
-<span class="n">sample</span><span class="p">,</span> <span class="n">sample_label</span> <span class="o">=</span> <span class="n">x_train</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">y_train</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-
-<span class="n">test_model</span> <span class="o">=</span> <span class="n">build_model</span><span class="p">()</span>
-<span class="n">test_model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;saved_models&#39;</span><span class="p">,</span> <span class="s1">&#39;best.hdf5&#39;</span><span class="p">))</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">test_model</span><span class="o">.</span><span class="n">predict_on_batch</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Predicted result is: {code_to_label(result.numpy())}, target result is: {code_to_label([sample_label])}&#39;</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Predicted result is: Johann Sebastian Bach, target result is: Franz Liszt
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">KFold</span>
-
-<span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;./k_fold_models/&#39;</span>
-
-<span class="k">def</span> <span class="nf">get_model_name</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
-    <span class="k">return</span> <span class="s1">&#39;model_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.h5&#39;</span>
-
-<span class="n">x_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">testing</span><span class="p">[</span><span class="s1">&#39;bytes_features&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">testing</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">y_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">testing</span><span class="p">[</span><span class="s1">&#39;canonical_composer&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">codes</span><span class="p">)</span>
-
-<span class="n">kf</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">fold_no</span> <span class="o">=</span> <span class="mi">1</span>
-
-<span class="n">k_fold_model</span> <span class="o">=</span> <span class="n">build_model</span><span class="p">()</span>
-<span class="n">k_fold_model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-    <span class="n">loss</span><span class="o">=</span><span class="n">keras</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">SparseCategoricalCrossentropy</span><span class="p">(</span><span class="n">from_logits</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-    <span class="n">optimizer</span><span class="o">=</span><span class="s2">&quot;adam&quot;</span><span class="p">,</span>
-    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">]</span>
-<span class="p">)</span>
-    
-<span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="n">kf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">x_data</span><span class="p">):</span>
-    <span class="n">x_train</span><span class="p">,</span> <span class="n">x_test</span> <span class="o">=</span> <span class="n">x_data</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span> <span class="n">x_data</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
-    <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">y_data</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span> <span class="n">y_data</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
-    
-    <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">ModelCheckpoint</span><span class="p">(</span><span class="n">save_dir</span> <span class="o">+</span> <span class="n">get_model_name</span><span class="p">(</span><span class="n">fold_no</span><span class="p">),</span>
-        <span class="n">monitor</span><span class="o">=</span><span class="s1">&#39;val_accuracy&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">save_best_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">)</span>
-
-    <span class="n">k_fold_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">validation_data</span><span class="o">=</span><span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">),</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">checkpoint</span><span class="p">])</span>
-    
-    <span class="n">fold_no</span> <span class="o">+=</span> <span class="mi">1</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Epoch 1/10
-257/257 [==============================] - ETA: 0s - loss: 3.3936 - accuracy: 0.1327
-Epoch 00001: val_accuracy improved from -inf to 0.17510, saving model to ./k_fold_models/model_1.h5
-257/257 [==============================] - 31s 119ms/step - loss: 3.3936 - accuracy: 0.1327 - val_loss: 2.8754 - val_accuracy: 0.1751
-Epoch 2/10
-257/257 [==============================] - ETA: 0s - loss: 2.8171 - accuracy: 0.1512
-Epoch 00002: val_accuracy did not improve from 0.17510
-257/257 [==============================] - 30s 116ms/step - loss: 2.8171 - accuracy: 0.1512 - val_loss: 2.8794 - val_accuracy: 0.0973
-Epoch 3/10
-257/257 [==============================] - ETA: 0s - loss: 2.8007 - accuracy: 0.1551
-Epoch 00003: val_accuracy did not improve from 0.17510
-257/257 [==============================] - 30s 116ms/step - loss: 2.8007 - accuracy: 0.1551 - val_loss: 2.9026 - val_accuracy: 0.1556
-Epoch 4/10
-257/257 [==============================] - ETA: 0s - loss: 2.7944 - accuracy: 0.1522
-Epoch 00004: val_accuracy did not improve from 0.17510
-257/257 [==============================] - 31s 120ms/step - loss: 2.7944 - accuracy: 0.1522 - val_loss: 2.9425 - val_accuracy: 0.0661
-Epoch 5/10
-257/257 [==============================] - ETA: 0s - loss: 2.7852 - accuracy: 0.1620
-Epoch 00005: val_accuracy did not improve from 0.17510
-257/257 [==============================] - 30s 117ms/step - loss: 2.7852 - accuracy: 0.1620 - val_loss: 2.9490 - val_accuracy: 0.1634
-Epoch 6/10
-257/257 [==============================] - ETA: 0s - loss: 2.7837 - accuracy: 0.1571
-Epoch 00006: val_accuracy did not improve from 0.17510
-257/257 [==============================] - 30s 117ms/step - loss: 2.7837 - accuracy: 0.1571 - val_loss: 2.8999 - val_accuracy: 0.1440
-Epoch 7/10
-257/257 [==============================] - ETA: 0s - loss: 2.7828 - accuracy: 0.1522
-Epoch 00007: val_accuracy did not improve from 0.17510
-257/257 [==============================] - 30s 118ms/step - loss: 2.7828 - accuracy: 0.1522 - val_loss: 54.7070 - val_accuracy: 0.0000e+00
-Epoch 8/10
-257/257 [==============================] - ETA: 0s - loss: 2.8059 - accuracy: 0.1473
-Epoch 00008: val_accuracy did not improve from 0.17510
-257/257 [==============================] - 30s 118ms/step - loss: 2.8059 - accuracy: 0.1473 - val_loss: 3.9106 - val_accuracy: 0.0506
-Epoch 9/10
-257/257 [==============================] - ETA: 0s - loss: 2.7952 - accuracy: 0.1483
-Epoch 00009: val_accuracy did not improve from 0.17510
-257/257 [==============================] - 30s 118ms/step - loss: 2.7952 - accuracy: 0.1483 - val_loss: 8.1152 - val_accuracy: 0.0817
-Epoch 10/10
-257/257 [==============================] - ETA: 0s - loss: 2.7838 - accuracy: 0.1512
-Epoch 00010: val_accuracy did not improve from 0.17510
-257/257 [==============================] - 30s 118ms/step - loss: 2.7838 - accuracy: 0.1512 - val_loss: 17.0253 - val_accuracy: 0.0000e+00
-Epoch 1/10
-257/257 [==============================] - ETA: 0s - loss: 2.8100 - accuracy: 0.1493
-Epoch 00001: val_accuracy improved from -inf to 0.05058, saving model to ./k_fold_models/model_2.h5
-257/257 [==============================] - 31s 119ms/step - loss: 2.8100 - accuracy: 0.1493 - val_loss: 5.8202 - val_accuracy: 0.0506
-Epoch 2/10
-257/257 [==============================] - ETA: 0s - loss: 2.7970 - accuracy: 0.1707
-Epoch 00002: val_accuracy improved from 0.05058 to 0.12451, saving model to ./k_fold_models/model_2.h5
-257/257 [==============================] - 31s 119ms/step - loss: 2.7970 - accuracy: 0.1707 - val_loss: 4.0369 - val_accuracy: 0.1245
-Epoch 3/10
-257/257 [==============================] - ETA: 0s - loss: 2.7900 - accuracy: 0.1590
-Epoch 00003: val_accuracy did not improve from 0.12451
-257/257 [==============================] - 30s 118ms/step - loss: 2.7900 - accuracy: 0.1590 - val_loss: 20.5466 - val_accuracy: 0.0039
-Epoch 4/10
-257/257 [==============================] - ETA: 0s - loss: 2.7829 - accuracy: 0.1649
-Epoch 00004: val_accuracy did not improve from 0.12451
-257/257 [==============================] - 30s 119ms/step - loss: 2.7829 - accuracy: 0.1649 - val_loss: 23.1163 - val_accuracy: 0.0000e+00
-Epoch 5/10
-257/257 [==============================] - ETA: 0s - loss: 2.7851 - accuracy: 0.1610
-Epoch 00005: val_accuracy did not improve from 0.12451
-257/257 [==============================] - 30s 117ms/step - loss: 2.7851 - accuracy: 0.1610 - val_loss: 11.3071 - val_accuracy: 0.0039
-Epoch 6/10
-257/257 [==============================] - ETA: 0s - loss: 2.7748 - accuracy: 0.1766
-Epoch 00006: val_accuracy did not improve from 0.12451
-257/257 [==============================] - 30s 116ms/step - loss: 2.7748 - accuracy: 0.1766 - val_loss: 14.4647 - val_accuracy: 0.0039
-Epoch 7/10
-257/257 [==============================] - ETA: 0s - loss: 2.7700 - accuracy: 0.1473
-Epoch 00007: val_accuracy improved from 0.12451 to 0.13230, saving model to ./k_fold_models/model_2.h5
-257/257 [==============================] - 30s 117ms/step - loss: 2.7700 - accuracy: 0.1473 - val_loss: 7.3104 - val_accuracy: 0.1323
-Epoch 8/10
-257/257 [==============================] - ETA: 0s - loss: 2.7612 - accuracy: 0.1678
-Epoch 00008: val_accuracy did not improve from 0.13230
-257/257 [==============================] - 30s 118ms/step - loss: 2.7612 - accuracy: 0.1678 - val_loss: 8.3144 - val_accuracy: 0.1167
-Epoch 9/10
-257/257 [==============================] - ETA: 0s - loss: 2.7552 - accuracy: 0.1620
-Epoch 00009: val_accuracy did not improve from 0.13230
-257/257 [==============================] - 31s 119ms/step - loss: 2.7552 - accuracy: 0.1620 - val_loss: 10.4157 - val_accuracy: 0.0000e+00
-Epoch 10/10
-257/257 [==============================] - ETA: 0s - loss: 2.7486 - accuracy: 0.1639
-Epoch 00010: val_accuracy did not improve from 0.13230
-257/257 [==============================] - 31s 119ms/step - loss: 2.7486 - accuracy: 0.1639 - val_loss: 3.6529 - val_accuracy: 0.1051
-Epoch 1/10
-257/257 [==============================] - ETA: 0s - loss: 2.7820 - accuracy: 0.1676
-Epoch 00001: val_accuracy improved from -inf to 0.00391, saving model to ./k_fold_models/model_3.h5
-257/257 [==============================] - 31s 120ms/step - loss: 2.7820 - accuracy: 0.1676 - val_loss: 6.9881 - val_accuracy: 0.0039
-Epoch 2/10
-257/257 [==============================] - ETA: 0s - loss: 2.7708 - accuracy: 0.1696
-Epoch 00002: val_accuracy did not improve from 0.00391
-257/257 [==============================] - 30s 118ms/step - loss: 2.7708 - accuracy: 0.1696 - val_loss: 16.3934 - val_accuracy: 0.0039
-Epoch 3/10
-257/257 [==============================] - ETA: 0s - loss: 2.7743 - accuracy: 0.1657
-Epoch 00003: val_accuracy improved from 0.00391 to 0.14453, saving model to ./k_fold_models/model_3.h5
-257/257 [==============================] - 30s 119ms/step - loss: 2.7743 - accuracy: 0.1657 - val_loss: 3.0175 - val_accuracy: 0.1445
-Epoch 4/10
-257/257 [==============================] - ETA: 0s - loss: 2.7563 - accuracy: 0.1657
-Epoch 00004: val_accuracy did not improve from 0.14453
-257/257 [==============================] - 30s 118ms/step - loss: 2.7563 - accuracy: 0.1657 - val_loss: 36.4026 - val_accuracy: 0.0000e+00
-Epoch 5/10
-257/257 [==============================] - ETA: 0s - loss: 2.7494 - accuracy: 0.1745
-Epoch 00005: val_accuracy did not improve from 0.14453
-257/257 [==============================] - 30s 117ms/step - loss: 2.7494 - accuracy: 0.1745 - val_loss: 4.9631 - val_accuracy: 0.0234
-Epoch 6/10
-257/257 [==============================] - ETA: 0s - loss: 2.7532 - accuracy: 0.1628
-Epoch 00006: val_accuracy did not improve from 0.14453
-257/257 [==============================] - 30s 117ms/step - loss: 2.7532 - accuracy: 0.1628 - val_loss: 8.1418 - val_accuracy: 0.0000e+00
-Epoch 7/10
-257/257 [==============================] - ETA: 0s - loss: 2.7360 - accuracy: 0.1706
-Epoch 00007: val_accuracy improved from 0.14453 to 0.15234, saving model to ./k_fold_models/model_3.h5
-257/257 [==============================] - 30s 118ms/step - loss: 2.7360 - accuracy: 0.1706 - val_loss: 3.6943 - val_accuracy: 0.1523
-Epoch 8/10
-257/257 [==============================] - ETA: 0s - loss: 2.7279 - accuracy: 0.1647
-Epoch 00008: val_accuracy did not improve from 0.15234
-257/257 [==============================] - 30s 117ms/step - loss: 2.7279 - accuracy: 0.1647 - val_loss: 11.5975 - val_accuracy: 0.0000e+00
-Epoch 9/10
-257/257 [==============================] - ETA: 0s - loss: 2.7314 - accuracy: 0.1745
-Epoch 00009: val_accuracy did not improve from 0.15234
-257/257 [==============================] - 30s 119ms/step - loss: 2.7314 - accuracy: 0.1745 - val_loss: 19.4535 - val_accuracy: 0.0000e+00
-Epoch 10/10
-257/257 [==============================] - ETA: 0s - loss: 2.7198 - accuracy: 0.1628
-Epoch 00010: val_accuracy did not improve from 0.15234
-257/257 [==============================] - 30s 117ms/step - loss: 2.7198 - accuracy: 0.1628 - val_loss: 14.8218 - val_accuracy: 0.0000e+00
-Epoch 1/10
-257/257 [==============================] - ETA: 0s - loss: 2.7470 - accuracy: 0.1491
-Epoch 00001: val_accuracy improved from -inf to 0.00781, saving model to ./k_fold_models/model_4.h5
-257/257 [==============================] - 30s 117ms/step - loss: 2.7470 - accuracy: 0.1491 - val_loss: 6.5269 - val_accuracy: 0.0078
-Epoch 2/10
-257/257 [==============================] - ETA: 0s - loss: 2.7218 - accuracy: 0.1686
-Epoch 00002: val_accuracy improved from 0.00781 to 0.09375, saving model to ./k_fold_models/model_4.h5
-257/257 [==============================] - 30s 119ms/step - loss: 2.7218 - accuracy: 0.1686 - val_loss: 3.1170 - val_accuracy: 0.0938
-Epoch 3/10
-257/257 [==============================] - ETA: 0s - loss: 2.7183 - accuracy: 0.1754
-Epoch 00003: val_accuracy did not improve from 0.09375
-257/257 [==============================] - 30s 118ms/step - loss: 2.7183 - accuracy: 0.1754 - val_loss: 15.7090 - val_accuracy: 0.0039
-Epoch 4/10
-257/257 [==============================] - ETA: 0s - loss: 2.7083 - accuracy: 0.1628
-Epoch 00004: val_accuracy did not improve from 0.09375
-257/257 [==============================] - 30s 118ms/step - loss: 2.7083 - accuracy: 0.1628 - val_loss: 4.0135 - val_accuracy: 0.0664
-Epoch 5/10
-257/257 [==============================] - ETA: 0s - loss: 2.7151 - accuracy: 0.1745
-Epoch 00005: val_accuracy did not improve from 0.09375
-257/257 [==============================] - 30s 118ms/step - loss: 2.7151 - accuracy: 0.1745 - val_loss: 3.7376 - val_accuracy: 0.0234
-Epoch 6/10
-257/257 [==============================] - ETA: 0s - loss: 2.7026 - accuracy: 0.1540
-Epoch 00006: val_accuracy did not improve from 0.09375
-257/257 [==============================] - 30s 118ms/step - loss: 2.7026 - accuracy: 0.1540 - val_loss: 3.7493 - val_accuracy: 0.0352
-Epoch 7/10
-257/257 [==============================] - ETA: 0s - loss: 2.6877 - accuracy: 0.1657
-Epoch 00007: val_accuracy did not improve from 0.09375
-257/257 [==============================] - 30s 117ms/step - loss: 2.6877 - accuracy: 0.1657 - val_loss: 6.6252 - val_accuracy: 0.0078
-Epoch 8/10
-257/257 [==============================] - ETA: 0s - loss: 2.6862 - accuracy: 0.1657
-Epoch 00008: val_accuracy did not improve from 0.09375
-257/257 [==============================] - 30s 118ms/step - loss: 2.6862 - accuracy: 0.1657 - val_loss: 3.9978 - val_accuracy: 0.0625
-Epoch 9/10
-257/257 [==============================] - ETA: 0s - loss: 2.6740 - accuracy: 0.1637
-Epoch 00009: val_accuracy did not improve from 0.09375
-257/257 [==============================] - 30s 118ms/step - loss: 2.6740 - accuracy: 0.1637 - val_loss: 5.4912 - val_accuracy: 0.0234
-Epoch 10/10
-257/257 [==============================] - ETA: 0s - loss: 2.6851 - accuracy: 0.1754
-Epoch 00010: val_accuracy did not improve from 0.09375
-257/257 [==============================] - 30s 117ms/step - loss: 2.6851 - accuracy: 0.1754 - val_loss: 7.1420 - val_accuracy: 0.0117
-Epoch 1/10
-257/257 [==============================] - ETA: 0s - loss: 2.7216 - accuracy: 0.1667
-Epoch 00001: val_accuracy improved from -inf to 0.02734, saving model to ./k_fold_models/model_5.h5
-257/257 [==============================] - 30s 118ms/step - loss: 2.7216 - accuracy: 0.1667 - val_loss: 3.7270 - val_accuracy: 0.0273
-Epoch 2/10
-257/257 [==============================] - ETA: 0s - loss: 2.6947 - accuracy: 0.1628
-Epoch 00002: val_accuracy did not improve from 0.02734
-257/257 [==============================] - 30s 118ms/step - loss: 2.6947 - accuracy: 0.1628 - val_loss: 9.8305 - val_accuracy: 0.0000e+00
-Epoch 3/10
-257/257 [==============================] - ETA: 0s - loss: 2.7034 - accuracy: 0.1637
-Epoch 00003: val_accuracy improved from 0.02734 to 0.09375, saving model to ./k_fold_models/model_5.h5
-257/257 [==============================] - 30s 118ms/step - loss: 2.7034 - accuracy: 0.1637 - val_loss: 6.2691 - val_accuracy: 0.0938
-Epoch 4/10
-257/257 [==============================] - ETA: 0s - loss: 2.6930 - accuracy: 0.1764
-Epoch 00004: val_accuracy did not improve from 0.09375
-257/257 [==============================] - 30s 118ms/step - loss: 2.6930 - accuracy: 0.1764 - val_loss: 16.5168 - val_accuracy: 0.0039
-Epoch 5/10
-257/257 [==============================] - ETA: 0s - loss: 2.6892 - accuracy: 0.1657
-Epoch 00005: val_accuracy did not improve from 0.09375
-257/257 [==============================] - 30s 118ms/step - loss: 2.6892 - accuracy: 0.1657 - val_loss: 12.9446 - val_accuracy: 0.0039
-Epoch 6/10
-257/257 [==============================] - ETA: 0s - loss: 2.6750 - accuracy: 0.1667
-Epoch 00006: val_accuracy improved from 0.09375 to 0.13672, saving model to ./k_fold_models/model_5.h5
-257/257 [==============================] - 30s 118ms/step - loss: 2.6750 - accuracy: 0.1667 - val_loss: 3.2247 - val_accuracy: 0.1367
-Epoch 7/10
-257/257 [==============================] - ETA: 0s - loss: 2.6627 - accuracy: 0.1676
-Epoch 00007: val_accuracy did not improve from 0.13672
-257/257 [==============================] - 30s 118ms/step - loss: 2.6627 - accuracy: 0.1676 - val_loss: 8.4166 - val_accuracy: 0.0000e+00
-Epoch 8/10
-257/257 [==============================] - ETA: 0s - loss: 2.6594 - accuracy: 0.1784
-Epoch 00008: val_accuracy did not improve from 0.13672
-257/257 [==============================] - 30s 118ms/step - loss: 2.6594 - accuracy: 0.1784 - val_loss: 13.7142 - val_accuracy: 0.0156
-Epoch 9/10
-257/257 [==============================] - ETA: 0s - loss: 2.6619 - accuracy: 0.1715
-Epoch 00009: val_accuracy did not improve from 0.13672
-257/257 [==============================] - 30s 117ms/step - loss: 2.6619 - accuracy: 0.1715 - val_loss: 18.3061 - val_accuracy: 0.0000e+00
-Epoch 10/10
-257/257 [==============================] - ETA: 0s - loss: 2.6470 - accuracy: 0.1754
-Epoch 00010: val_accuracy did not improve from 0.13672
-257/257 [==============================] - 30s 118ms/step - loss: 2.6470 - accuracy: 0.1754 - val_loss: 4.0587 - val_accuracy: 0.0352
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[53]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_train</span><span class="p">))</span>
-<span class="n">sample</span><span class="p">,</span> <span class="n">sample_label</span> <span class="o">=</span> <span class="n">x_train</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">y_train</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-
-<span class="n">test_model</span> <span class="o">=</span> <span class="n">build_model</span><span class="p">()</span>
-<span class="n">test_model</span><span class="o">.</span><span class="n">set_weights</span><span class="p">(</span><span class="n">k_fold_model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">())</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">test_model</span><span class="o">.</span><span class="n">predict_on_batch</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Predicted result is: {code_to_label(result.numpy())}, target result is: {code_to_label([sample_label])}&#39;</span><span class="p">)</span>
-
-<span class="k">for</span> <span class="n">model_file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;k_fold_models&#39;</span><span class="p">)):</span>
-    <span class="n">test_model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;k_fold_models&#39;</span><span class="p">,</span> <span class="n">model_file</span><span class="p">))</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">test_model</span><span class="o">.</span><span class="n">predict_on_batch</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{model_file}</span><span class="s1"> predicted result is: {code_to_label(result.numpy())}&#39;</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Predicted result is: Pyotr Ilyich Tchaikovsky, target result is: Johann Sebastian Bach
-model_1.h5 predicted result is: Frédéric Chopin
-model_2.h5 predicted result is: Franz Schubert
-model_3.h5 predicted result is: Franz Schubert
-model_4.h5 predicted result is: Johann Sebastian Bach
-model_5.h5 predicted result is: Johann Sebastian Bach
-</pre>
-</div>
 </div>
 
 </div>

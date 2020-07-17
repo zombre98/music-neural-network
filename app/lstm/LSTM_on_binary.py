@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 import os
@@ -12,10 +12,10 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
-from app.features.DataMIDI import File
+from app.features.MidiData import MidiData
 
 
-# In[2]:
+# In[22]:
 
 
 import pandas
@@ -33,29 +33,10 @@ dataset = pandas.read_json('../../data/maestro-v2.0.0/maestro-v2.0.0.json')
 dataset = dataset.astype(dtype)
 
 
-# In[19]:
+# In[23]:
 
 
-def filesize(filename):
-    return os.path.getsize('../../data/maestro-v2.0.0/' + filename)
-
-def read_file(filename):
-    with open('../../data/maestro-v2.0.0/' + filename, 'rb') as f:
-        return f.read()
-    
-def bytes_as_array(limit):
-    def with_limit(file):
-        return np.frombuffer(file[0:limit], dtype='int8') / 255.0
-    return with_limit
-
-def code_to_label(code):
-    return dataset.canonical_composer.cat.categories[code][0]
-
-testing = pandas.DataFrame(dataset).sample(frac=1).reset_index(drop=True)
-testing['midi_filesize'] = testing['midi_filename'].apply(filesize)
-testing['midi_file'] = testing['midi_filename'].apply(read_file)
-testing['bytes_features'] = testing['midi_file'].apply(bytes_as_array(testing.midi_filesize.min()))
-testing.info()
+get_ipython().run_cell_magic('time', '', "def get_midi_data(filename):\n    return MidiData(os.path.join(DATASET_DIR, filename))\n\ndef filesize(filename):\n    return os.path.getsize('../../data/maestro-v2.0.0/' + filename)\n\ndef read_file(filename):\n    with open('../../data/maestro-v2.0.0/' + filename, 'rb') as f:\n        return f.read()\n    \ndef bytes_as_array(limit):\n    def with_limit(file):\n        return np.frombuffer(file[0:limit], dtype='int8') / 255.0\n    return with_limit\n\ndef code_to_label(code):\n    return dataset.canonical_composer.cat.categories[code][0]\n\ntesting = pandas.DataFrame(dataset).sample(frac=1).reset_index(drop=True)\ntesting['midi_filesize'] = testing['midi_filename'].apply(filesize)\ntesting['midi_file'] = testing['midi_filename'].apply(read_file)\ntesting['midi_data'] = testing['midi_filename'].swifter.progress_bar().allow_dask_on_strings().apply(get_midi_data)")
 
 
 # In[20]:
