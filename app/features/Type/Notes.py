@@ -1,13 +1,16 @@
 class Notes:
     def __init__(self):
-        self.notesWithRepetition = []  # {'note': , 'repetition': , 'time': }
+        self.notesWithRepetition = []  # {'note': , 'repetition': , 'percentage': }
         self.notes = []  # {{'note': , 'currentTime': }
         self.totalTime = 0
+        self.totalNotes = 0
 
     def setTotalTime(self, time):
         self.totalTime = time
 
     def getRepetition(self):
+        for i in range(len(self.notesWithRepetition)):
+            self.notesWithRepetition[i]['percentage'] = round((self.notesWithRepetition[i].get('repetition') / self.totalNotes) * 100, 2)
         self.notesWithRepetition.sort(key=getRepetition, reverse=True)
         return self.notesWithRepetition
 
@@ -18,6 +21,7 @@ class Notes:
         return [d['note'] for d in self.notes]
 
     def append(self, note, currentTime):
+        self.totalNotes += 1
         self.notes.append({'note': note, 'currentTime': currentTime})
 
         find = False
@@ -33,18 +37,18 @@ class Notes:
     # 2: middle
     # 3: middle end
     # 4: end
-    def getAverageByPartsTime(self):
+    def getAverageByPartsTime(self, nbSplit):
         averageMIDI = []
         j = 0
-        timeSplit = self.totalTime / 5
+        timeSplit = self.totalTime / nbSplit
         currentTimeSplit = timeSplit
         average = 0
         for i in range(len(self.notes)):
             average = average + self.notes[i]['note']
-            j = j + 1
-            if self.notes[i].get('currentTime') >= currentTimeSplit or currentTimeSplit == (timeSplit * 5):
+            j += 1
+            if self.notes[i].get('currentTime') >= currentTimeSplit or i == len(self.notes) - 1:
                 averageMIDI.append(round(average / j, 2))
-                currentTimeSplit = currentTimeSplit + timeSplit
+                currentTimeSplit += timeSplit
                 j = 0
                 average = 0
         return averageMIDI

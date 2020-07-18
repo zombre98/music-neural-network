@@ -17,7 +17,7 @@ def main(argv):
     print(mid.tempos.getAll())
 
     print('= AVERAGE TEMPOS TIME =')
-    print(mid.tempos.getAverageByPartsTime())
+    print(mid.tempos.getAverageByPartsTime(1))
 
     print('====== MAX TEMPO =======')
     print(mid.tempos.getMax())
@@ -27,17 +27,17 @@ def main(argv):
 
     print('=================== NOTES ===================')
 
+    print('====== REPETITION ======')
+    print(mid.notes.getRepetition())
+
     print('======== NOTES WITH TIME ========')
     print(mid.notes.get())
 
     print('==== SIMPLY NOTES ====')
     print(mid.notes.getAll())
 
-    print('====== REPETITION ======')
-    print(mid.notes.getRepetition())
-
     print('= AVERAGE NOTES TIME =')
-    print(mid.notes.getAverageByPartsTime())
+    print(mid.notes.getAverageByPartsTime(10))
 
     print('====== MAX NOTE =======')
     print(mid.notes.getMax())
