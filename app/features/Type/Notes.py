@@ -10,7 +10,7 @@ class Notes:
 
     def getRepetition(self):
         for i in range(len(self.notesWithRepetition)):
-            self.notesWithRepetition[i]['percentage'] = round((self.notesWithRepetition[i].get('repetition') / self.totalNotes) * 100, 2)
+            self.notesWithRepetition[i]['percentage'] = (self.notesWithRepetition[i].get('repetition') / self.totalNotes) * 100
         self.notesWithRepetition.sort(key=getRepetition, reverse=True)
         return self.notesWithRepetition
 

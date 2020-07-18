@@ -15,7 +15,7 @@ class Tempos:
         if self.totalTempos == 0:
             self.totalTempos = 1
         for i in range(len(self.temposWithRepetition)):
-            self.temposWithRepetition[i]['percentage'] = round((self.temposWithRepetition[i].get('repetition') / self.totalTempos) * 100, 2)
+            self.temposWithRepetition[i]['percentage'] = (self.temposWithRepetition[i].get('repetition') / self.totalTempos) * 100
         self.temposWithRepetition.sort(key=getRepetition, reverse=True)
         return self.temposWithRepetition
 
