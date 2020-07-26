@@ -17,8 +17,8 @@ class Notes:
     def getAll(self):
         return [d['note'] for d in self.notes]
 
-    def append(self, note, currentTime):
-        self.notes.append({'note': note, 'currentTime': currentTime})
+    def append(self, note, currentTime, deltaTime):
+        self.notes.append({'note': note, 'currentTime': currentTime, 'deltaTime': deltaTime})
 
         find = False
         for j in range(len(self.notesWithRepetition)):

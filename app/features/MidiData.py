@@ -23,4 +23,6 @@ class MidiData:
                 # fill tempo
                 self.tempos.append(msg.tempo, self.mid.ticks_per_beat, msg.time, currentTime)
             elif msg.type == 'note_on':
-                self.notes.append(msg.note, currentTime)
+                self.notes.append(msg.note, currentTime, delta)
+        self.notes.setTotalTime(currentTime)
+        self.tempos.setTotalTime(currentTime)
