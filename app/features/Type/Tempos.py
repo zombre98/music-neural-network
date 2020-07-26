@@ -47,7 +47,7 @@ class Tempos:
         average = 0
         for i in range(len(self.tempos)):
             average = average + self.tempos[i]['tempo']
-            j = j + 1
+            j += 1
             if self.tempos[i].get('currentTime') >= currentTimeSplit or currentTimeSplit == (timeSplit * 5):
                 averageMIDI.append(round(average / j, 2))
                 currentTimeSplit = currentTimeSplit + timeSplit
