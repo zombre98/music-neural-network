@@ -50,6 +50,9 @@ print(f'Elapsed time: {(current_time - start_time) / 60} minute(s)')
 
 
 ##
+def code_to_label(code):
+    return dataset.canonical_composer.cat.categories[code]
+
 def extract_features(features):
     midi_data = features['midi_data']
     return {'Composer': features['canonical_composer'],
@@ -64,18 +67,13 @@ def extract_features(features):
 def build_model(input_shape, output_shape):
     print(f'Input shape : {input_shape}')
     print(f'Output shape : {output_shape}')
-    net = ResNet50(include_top=False, weights='imagenet', input_tensor=None,
-                   input_shape=input_shape)
-    x = net.output
-    x = Flatten()(x)
-    x = Dropout(0.5)(x)
-    output_layer = Dense(NUM_CLASSES, activation='softmax', name='softmax')(x)
-    print(f'output shape : {output_layer}')
-    model_to_build = Model(inputs=net.input, outputs=output_layer)
-    # for layer in model.layers[:FREEZE_LAYERS]:
-    #     layer.trainable = False
-    # for layer in model.layers[FREEZE_LAYERS:]:
-    #     layer.trainable = True
+    model_to_build = keras.Sequential(
+        [
+            keras.layers.Dense(2, activation="relu", name="input_layer", input_shape=input_shape),
+            keras.layers.Flatten(name='Flatten'),
+            keras.layers.Dense(output_shape, name="output_layer"),
+        ]
+    )
     model_to_build.compile(optimizer=Adam(lr=1e-5), loss='binary_crossentropy', metrics=['accuracy'])
     model_to_build.summary()
     return model_to_build
@@ -83,10 +81,9 @@ def build_model(input_shape, output_shape):
 
 ##
 def format_data(data_to_format):
-    x_data = np.asarray(data_to_format.midi_data.map(lambda x: x. .getAverageByPartsTime()))
-    y_data = np.asarray(data_to_format['canonical_composer'])
+    x_data = np.vstack(data_to_format.midi_data.map(lambda x: np.array([x.notes.getMax(), x.notes.getMin()])))
+    y_data = np.asarray(data_to_format['canonical_composer'].cat.codes)
 
-    print(x_data)
     return x_data, y_data
 
 
@@ -97,28 +94,30 @@ NUM_CLASSES = number_of_classes()
 x_data, y_data = format_data(dataset)
 
 ##
-model = build_model((32, 32, 3), 1)
+model = build_model(x_data[0].shape, NUM_CLASSES)
 
-kf = KFold(5)
-fold_no = 1
+kfold = KFold(n_splits=5)
 
 ##
-for train_index, test_index in kf.split(x_data):
+fold_no = 1
+for train_index, test_index in kfold.split(x_data):
     x_train, x_test = x_data[train_index], x_data[test_index]
     y_train, y_test = y_data[train_index], y_data[test_index]
 
     checkpoint = keras.callbacks.ModelCheckpoint(f'./models/models_{fold_no}.h5',
-                                                 monitor='val_accuracy', verbose=1,
+                                                 monitor='val_accuracy', verbose=0,
                                                  save_best_only=True, mode='max')
     model.fit(x_train, y_train, steps_per_epoch=10, epochs=15, callbacks=[checkpoint],
-              validation_data=(x_test, y_test), use_multiprocessing=True, verbose=2)
-    loss, accuracy = model.evaluate(x_test, y_test, steps=10, use_multiprocessing=True, verbose=2)
+              validation_data=(x_test, y_test), use_multiprocessing=True, verbose=0)
+    loss, accuracy = model.evaluate(x_test, y_test, steps=10, use_multiprocessing=True, verbose=0)
     print(f'Model n°{fold_no} has achieved {accuracy}% of accuracy with {loss} loss')
+    fold_no += 1
 
-# idx = np.random.choice(len(x_train))
-# sample, sample_label = x_train[idx], y_train[idx]
-#
-# test_model = build_model()
-# test_model.set_weights(model.get_weights())
-# result = tensorflow.argmax(test_model.predict_on_batch(tensorflow.expand_dims(sample, 0)), axis=1)
-# print(f'Predicted result is: {result.numpy()}, target result is: {sample_label}')
+##
+idx = np.random.choice(len(x_data))
+sample, sample_label = x_data[idx], y_data[idx]
+
+test_model = build_model(x_data[0].shape, NUM_CLASSES)
+test_model.set_weights(model.get_weights())
+result = tensorflow.argmax(test_model.predict_on_batch(tensorflow.expand_dims(sample, 0)), axis=1)
+print(f'Predicted result is: {code_to_label(result)}, target result is: {code_to_label(sample_label)}, idx: {idx}')
