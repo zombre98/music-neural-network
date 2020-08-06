@@ -5,44 +5,38 @@ from app.features.MidiData import MidiData
 def main(argv):
     mid = MidiData(argv[0])
 
-    print('=================== TEMPOS ===================')
+    print('=========== TEMPOS =============')
 
-    print('====== REPETITION ======')
-    print(mid.tempos.getRepetition())
-
-    print('======== TEMPOS WITH TIME ========')
+    print('======== DATA ========')
     print(mid.tempos.get())
 
-    print('==== SIMPLY TEMPOS ====')
-    print(mid.tempos.getAll())
+    print('===== REPETITION =====')
+    print(mid.tempos.getRepetition())
 
-    print('= AVERAGE TEMPOS TIME =')
-    print(mid.tempos.getAverageByPartsTime(1))
+    print('== AVERAGE BY PART ==')
+    print(mid.tempos.getAverageByPartsTime(2))
 
-    print('====== MAX TEMPO =======')
+    print('======== MAX =========')
     print(mid.tempos.getMax())
 
-    print('====== MIN TEMPO =======')
+    print('======== MIN =========')
     print(mid.tempos.getMin())
 
-    print('=================== NOTES ===================')
+    print('=========== NOTES =============')
 
-    print('====== REPETITION ======')
-    print(mid.notes.getRepetition())
-
-    print('======== NOTES WITH TIME ========')
+    print('======== DATA ========')
     print(mid.notes.get())
 
-    print('==== SIMPLY NOTES ====')
-    print(mid.notes.getAll())
+    print('===== REPETITION =====')
+    print(mid.notes.getRepetition())
 
-    print('= AVERAGE NOTES TIME =')
-    print(mid.notes.getAverageByPartsTime(10))
+    print('== AVERAGE BY PART ==')
+    print(mid.notes.getAverageByPartsTime(2))
 
-    print('====== MAX NOTE =======')
+    print('======== MAX =========')
     print(mid.notes.getMax())
 
-    print('====== MIN NOTE =======')
+    print('======== MIN =========')
     print(mid.notes.getMin())
 
 
