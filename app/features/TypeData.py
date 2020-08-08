@@ -9,7 +9,8 @@ class TypeData:
         self.nameType = nameType
 
     def getRepetition(self):
-        df = pd.DataFrame({'percentage': self.dataFrame[self.nameType].value_counts(normalize=True) * 100, 'count': self.dataFrame.pivot_table(index=[self.nameType], aggfunc='size')})
+        df = pd.DataFrame({'percentage': self.dataFrame[self.nameType].value_counts(normalize=True) * 100,
+                           'count': self.dataFrame.pivot_table(index=[self.nameType], aggfunc='size')})
         return df
 
     def get(self):
@@ -24,7 +25,7 @@ class TypeData:
         i = 0
 
         while i < nbSplit:
-            arrayAverage.append(round(pd.DataFrame(self.dataFrame[(self.dataFrame['currentTime'] <= timeToSplit * (i + 1)) & (self.dataFrame['currentTime'] >= timeToSplit * i)])[self.nameType].mean(), 2))
+            arrayAverage.append(round(pd.DataFrame(self.dataFrame[(self.dataFrame['currentTime'] < timeToSplit * (i + 1)) & (self.dataFrame['currentTime'] >= timeToSplit * i)])[self.nameType].mean(), 2))
             i += 1
 
         return arrayAverage
@@ -37,4 +38,3 @@ class TypeData:
 
     def createDataFrame(self):
         self.dataFrame = pd.DataFrame(self.data, columns=[self.nameType, 'currentTime'])
-

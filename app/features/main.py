@@ -31,7 +31,7 @@ def main(argv):
     print(mid.notes.getRepetition())
 
     print('== AVERAGE BY PART ==')
-    print(mid.notes.getAverageByPartsTime(2))
+    print(mid.notes.getAverageByPartsTime(5))
 
     print('======== MAX =========')
     print(mid.notes.getMax())
