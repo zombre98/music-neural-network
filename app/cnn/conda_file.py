@@ -39,7 +39,6 @@ def number_of_classes():
 def get_midi_data(filename):
     return MidiData(os.path.join("./data/maestro-v2.0.0/", filename))
 
-
 ##
 data = pd.read_json('./data/maestro-v2.0.0/maestro-v2.0.0.json')
 dataset = data.astype(DTYPE)
@@ -102,11 +101,11 @@ def build_model(input_shape, output_shape):
             keras.layers.Dropout(0.5),
             keras.layers.MaxPooling1D(pool_size=2),
             keras.layers.Flatten(name='flatten_layer'),
-            keras.layers.Dense(100, activation='relu'),
+            # keras.layers.Dense(100, activation='relu'),
             keras.layers.Dense(output_shape),
         ]
     )
-    model_to_build.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    model_to_build.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'], run_eagerly=True)
     model_to_build.summary()
     return model_to_build
 
@@ -135,11 +134,15 @@ x_train, y_train, x_test, y_test, x_validation, y_validation = format_data(datas
 model = build_model(x_train[0].shape, NUM_CLASSES)
 
 ##
+keras.utils.plot_model(model, to_file='model.png', show_shapes=True)
+
+##
 early_stopping = keras.callbacks.EarlyStopping(patience=10)
 checkpoint = keras.callbacks.ModelCheckpoint(f'./models/model.h5',
                                              monitor='val_accuracy', verbose=2,
                                              save_best_only=True, mode='max')
-history = model.fit(x_train, y_train, batch_size=100, epochs=16, callbacks=[early_stopping, checkpoint],
+history = model.fit(x_train, y_train, batch_size=100, epochs=16,
+                    callbacks=[early_stopping, checkpoint],
                     validation_data=(x_test, y_test), use_multiprocessing=True, verbose=2)
 loss, accuracy = model.evaluate(x_test, y_test, steps=10, use_multiprocessing=True, verbose=2)
 print(f'Model has achieved {accuracy}% of accuracy with {loss} loss')
