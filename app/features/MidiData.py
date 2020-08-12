@@ -1,28 +1,30 @@
 from mido import MidiFile, tempo2bpm, tick2second, merge_tracks
-from app.features.Type.Notes import Notes
-from app.features.Type.Tempos import Tempos
+from app.features.TypeData import TypeData
 
+DEFAULT_TEMPO = 500000
 
 class MidiData:
     def __init__(self, file_name):
-        self.mid = MidiFile(file_name)
-        self.tempos = Tempos()
-        self.notes = Notes()
+        self.tempos = TypeData("tempo")
+        self.notes = TypeData("note")
 
-        self.parseData()
+        self.parseData(file_name)
 
-    def parseData(self):
-        self.notes.setTotalTime(self.mid.length)
-        self.tempos.setTotalTime(self.mid.length)
+    def parseData(self, file_name):
+        mid = MidiFile(file_name)
         currentTime = 0
-        tempoTemp = 0
-        for msg in merge_tracks(self.mid.tracks):
-            currentTime += tick2second(msg.time, self.mid.ticks_per_beat, tempoTemp)
+        tempo = DEFAULT_TEMPO
+        for msg in merge_tracks(mid.tracks):
+            if msg.time > 0:
+                delta = tick2second(msg.time, mid.ticks_per_beat, tempo)
+            else:
+                delta = 0
+            currentTime += delta
+
             if msg.type == 'set_tempo':
-                tempoTemp = msg.tempo
-                # fill tempo
-                self.tempos.append(msg.tempo, self.mid.ticks_per_beat, msg.time, currentTime)
+                tempo = msg.tempo
+                self.tempos.append(tempo2bpm(msg.tempo), currentTime)
             elif msg.type == 'note_on':
-                self.notes.append(msg.note, currentTime, delta)
-        self.notes.setTotalTime(currentTime)
-        self.tempos.setTotalTime(currentTime)
+                self.notes.append(msg.note, currentTime)
+        self.notes.createDataFrame()
+        self.tempos.createDataFrame()
