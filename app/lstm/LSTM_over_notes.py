@@ -6,6 +6,7 @@
 
 import os
 import json
+import datetime
 
 import numpy as np
 import tensorflow as tf
@@ -20,6 +21,13 @@ tf.debugging.set_log_device_placement(False)
 from app.features.MidiData import MidiData
 
 DATASET_DIR = "../../data/maestro-v2.0.0"
+
+
+# In[2]:
+
+
+# Load the TensorBoard notebook extension
+get_ipython().run_line_magic('load_ext', 'tensorboard')
 
 
 # In[2]:
@@ -64,7 +72,7 @@ def code_to_label(code):
 
 
 def get_notes(midi_data):
-    return np.asarray([n["note"] for n in midi_data.notes.notes])
+    return midi_data.notes.get().note.to_numpy()
 
 
 # In[4]:
@@ -144,26 +152,21 @@ pandas.DataFrame(
 # In[8]:
 
 
-timesteps = max_notes_count
-features = 1
-output_size = len(reduced_dataset.canonical_composer.cat.categories)
-units = 64
+# Shuffle dataset
+from sklearn.utils import shuffle
 
-
-def build_model():
-    mask_layer = keras.layers.Masking(mask_value=0, input_shape=(timesteps, features))
-    lstm_layer = keras.layers.LSTM(units)
-    return keras.models.Sequential(
-        [
-            mask_layer,
-            lstm_layer,
-            keras.layers.BatchNormalization(),
-            keras.layers.Dense(output_size),
-        ]
-    )
+reduced_dataset = shuffle(reduced_dataset)
 
 
 # In[9]:
+
+
+timesteps = max_notes_count
+features = 1
+output_size = len(reduced_dataset.canonical_composer.cat.categories)
+
+
+# In[10]:
 
 
 train = reduced_dataset[reduced_dataset.split == "train"]
@@ -184,7 +187,24 @@ print(f"train: {x_train.shape}, {y_train.shape}")
 print(f"test:  {x_test.shape}, {y_test.shape}")
 
 
-# In[10]:
+# In[11]:
+
+
+def build_model():
+    mask_layer = keras.layers.Masking(mask_value=0, input_shape=(timesteps, features))
+    deep_lstm_layer = keras.layers.LSTM(32, return_sequences=True)
+    lstm_layer = keras.layers.LSTM(32)
+    return keras.models.Sequential(
+        [
+            mask_layer,
+            deep_lstm_layer,
+            lstm_layer,
+            keras.layers.Dense(output_size),
+        ]
+    )
+
+
+# In[12]:
 
 
 model = build_model()
@@ -196,7 +216,9 @@ model.compile(
 
 display(model.summary())
 
-early_stopping = tf.keras.callbacks.EarlyStopping(patience=3)
+log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+early_stopping = tf.keras.callbacks.EarlyStopping(patience=12)
 checkpoint = keras.callbacks.ModelCheckpoint(
     os.path.join(os.getcwd(), "saved_models", "best.hdf5"),
     monitor="val_accuracy",
@@ -209,17 +231,19 @@ last_history = model.fit(
     x_train,
     y_train,
     validation_data=(x_test, y_test),
-    batch_size=32,
+    batch_size=16,
     epochs=100,
-    callbacks=[early_stopping, checkpoint],
+    callbacks=[tensorboard_callback, early_stopping, checkpoint],
 )
 
 
-# In[11]:
+# In[13]:
 
 
-pandas.DataFrame(last_history.history)[["loss", "val_loss"]].plot().set(xlabel="Epoch", ylabel="Loss")
-pandas.DataFrame(last_history.history)[["accuracy", "val_accuracy"]].plot().set(xlabel="Epoch", ylabel="Accuracy")
+get_ipython().run_line_magic('tensorboard', '--host 192.168.1.23 --logdir ./logs/fit')
+
+# pandas.DataFrame(last_history.history)[["loss", "val_loss"]].plot().set(xlabel="Epoch", ylabel="Loss")
+# pandas.DataFrame(last_history.history)[["accuracy", "val_accuracy"]].plot().set(xlabel="Epoch", ylabel="Accuracy")
 
 
 # In[17]:
