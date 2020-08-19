@@ -13,6 +13,13 @@ tensorflow = "*"
 pandas = "*"
 swifter = "*"
 scikit-learn = "*"
+pydot = "*"
+graphviz = "*"
+pydotplus = "*"
+pydot-ng = "*"
+jupyter = "*"
+numpy = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.7"

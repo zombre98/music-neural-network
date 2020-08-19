@@ -101,7 +101,7 @@ def build_model(input_shape, output_shape):
             keras.layers.Dropout(0.5),
             keras.layers.MaxPooling1D(pool_size=2),
             keras.layers.Flatten(name='flatten_layer'),
-            # keras.layers.Dense(100, activation='relu'),
+            keras.layers.Dense(100, activation='relu'),
             keras.layers.Dense(output_shape),
         ]
     )
