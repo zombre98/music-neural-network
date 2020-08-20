@@ -10,3 +10,5 @@
 
 # Ignore pycache
 __pycache__
+
+*.pickle
