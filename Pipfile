@@ -20,6 +20,10 @@ pydot-ng = "*"
 jupyter = "*"
 numpy = "*"
 matplotlib = "*"
+ipykernel = "*"
+ipython = "*"
+black = "*"
+
 
 [requires]
 python_version = "3.7"
