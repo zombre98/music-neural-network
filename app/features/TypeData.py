@@ -24,7 +24,7 @@ class TypeData:
         i = 0
 
         while i < nbSplit:
-            arrayAverage.append(round(pd.DataFrame(self.dataFrame[(self.dataFrame['currentTime'] < timeToSplit * (i + 1)) & (self.dataFrame['currentTime'] >= timeToSplit * i)])[self.nameType].mean(), 2))
+            arrayAverage.append(round(pd.DataFrame(self.dataFrame[(self.dataFrame['currentTime'] <= timeToSplit * (i + 1)) & (self.dataFrame['currentTime'] >= timeToSplit * i)])[self.nameType].mean(), 2))
             i += 1
 
         return arrayAverage
