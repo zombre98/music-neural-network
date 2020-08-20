@@ -28,4 +28,3 @@ class MidiData:
                 self.notes.append(msg.note, currentTime)
         self.notes.createDataFrame()
         self.tempos.createDataFrame()
-
