@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Corpus</title>
+    <style type="text/css">
+        .tg {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        .tg td {
+            border-color: black;
+            border-style: solid;
+            border-width: 1px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            overflow: hidden;
+            padding: 10px 5px;
+            word-break: normal;
+        }
+
+        .tg th {
+            border-color: black;
+            border-style: solid;
+            border-width: 1px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            font-weight: normal;
+            overflow: hidden;
+            padding: 10px 5px;
+            word-break: normal;
+        }
+
+        .tg .tg-0lax {
+            text-align: left;
+            vertical-align: top
+        }
+    </style>
+</head>
+<body>
+<h1>Corpus</h1>
+<h2>Information</h2>
+<ul>
+    <li>Project reminder:&nbsp;<a
+            href="https://forum.cs.kent.ac.uk/showthread.php?2577-Classification-of-music-by-a-neural-network">project</a>
+    </li>
+    <li>Supervisor: Marek Grzes</li>
+    <li>Team:
+        <ul>
+            <li>Armand M&eacute;grot</li>
+            <li>Thomas Burgaud</li>
+            <li>Antoine Lefebvre</li>
+        </ul>
+    </li>
+</ul>
+<h2>Organisation</h2>
+<p>We have divided the project into 3 separate parts:</p>
+<ul>
+    <li>Extraction from the music cheats: Antoine Lefebvre</li>
+    <li>Convolutional Neural Networks (CNN): Thomas Burgaud</li>
+    <li>Long Short-Term Memory (LSTM): Armand M&eacute;grot</li>
+</ul>
+<p>
+    In order not to get lost in the project and to have an efficient follow-up, we have weekly meetings (every Friday
+    evening).
+</p>
+<h2>Important research documents</h2>
+<ul>
+    <li>
+        <a href="http://www.iaeng.org/publication/IMECS2010/IMECS2010_pp546-550.pdf">
+            Automatic Musical Pattern Feature Extraction Using Convolutional Neural Network
+        </a>
+    </li>
+    <li>
+        <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=8441340">
+            Automatic Music Genre Classification using Convolution Neural Network
+        </a>
+    </li>
+    <li>
+        <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=7472657">
+            Investigating Gated Recurrent Networks for Speech Synthesis
+        </a>
+    </li>
+</ul>
+<h2>Code</h2>
+<p>For this project, we use GitHub,&nbsp;here is the link to our public repository:</p>
+<ul>
+    <li>
+        <a href="https://github.com/zombre98/music-neural-network">https://github.com/zombre98/music-neural-network</a>
+    </li>
+</ul>
+<p>
+    Like our organization the code is divided into 3 parts: Features, LSTM and CNN.<br/>
+</p>
+<table class="tg">
+    <thead>
+    <tr>
+        <th class="tg-0lax">File name</th>
+        <th class="tg-0lax">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td class="tg-0lax"><a href="./app/">app/</a></td>
+        <td class="tg-0lax">This folder you will find the 3 parts: Features, CNN and LSTM</td>
+    </tr>
+    <tr>
+        <td class="tg-0lax"><a href="./app/features">app/features/</a></td>
+        <td class="tg-0lax">This folder contains the class that parse midi files</td>
+    </tr>
+    <tr>
+        <td class="tg-0lax"><a href="./app/features/MidiData.py">app/features/MidiData.py</a></td>
+        <td class="tg-0lax">
+            This class allows us to parse the files of our dataset and extract features that our
+            artificial intelligences can learn.
+            To do this there is a <a href="./app/features/TypeData.py">TypeData.py</a>
+            subclass that offers an interface to extract notes or tempos.
+    </tr>
+    <tr>
+        <td class="tg-0lax"><a href="./app/lstm">app/lstm</a></td>
+        <td class="tg-0lax">It contains 2 jupyter notebooks that allow us to test our LSTM model faster</td>
+    </tr>
+    <tr>
+        <td class="tg-0lax"><a href="./app/lstm/LSTM_over_notes.ipynb">app/lstm/LSTM_over_notes.ipynb</a></td>
+        <td class="tg-0lax">
+            This file implements an AI which tries to recognize the music thanks to the notes extracted
+            from the file with the MidiData class.
+        </td>
+    </tr>
+    <tr>
+        <td class="tg-0lax"><a href="./app/lstm/LSTM_on_binary.ipynb">app/lstm/LSTM_on_binary.ipynb</a></td>
+        <td class="tg-0lax">
+            This file implements an AI that tries to recognize the music by reading the binary files
+            without extracting any features.
+        </td>
+    </tr>
+    <tr>
+        <td class="tg-0lax"><a href="./app/cnn/">app/cnn/</a></td>
+        <td class="tg-0lax">
+            This folder is organized in the same way as the LSTM folder it also contains an exploration
+            of another model of Artificial Intelligence
+        </td>
+    </tr>
+    <tr>
+        <td class="tg-0lax"><a href="./app/cnn/CNN_over_notes.ipynb">app/cnn/CNN_over_notes.ipynb</a></td>
+        <td class="tg-0lax">
+            This file implements a convolutional neural network that tries to learn the music score by
+            browsing the notes.
+        </td>
+    </tr>
+    <tr>
+        <td class="tg-0lax"><a href="./data">data/</a></td>
+        <td class="tg-0lax">
+            This folder is our dataset which contains the file
+            <a href="./data/maestro-v2.0.0/maestro-v2.0.0.csv">maestro-v2.0.0.json</a> that allow us to read it
+        </td>
+    </tr>
+    </tbody>
+</table>
+<p>
+All the .html and .py files that are in this folder they are just files generated by our notebook to be
+able to read us and share our code
+</p>
+<h2>Code responsibility split</h2>
+<ul>
+    <li>
+        <b>Antoine Lefebvre:</b><br/>
+        For this project, he was in charge of extracting features from the music cheat. He uses
+        different libraries to parse MIDI files in order to produce information that can be interesting for learning and
+        author recognition.
+    </li>
+    <li>
+        <b>Armand M&eacute;grot:</b><br/>
+        He created an LSTM Neural Network to be able to recognize the music using Antoine's features.
+        Armand also configured TensorflowGPU to be able to train the LSTM model faster.
+        Some models would have taken several days to train if we had not use Armand's graphics card.
+    </li>
+    <li>
+        <b>Thomas Burgaud:</b><br/>
+        As explained above Thomas is busy exploring a music classification system through a Convolutional Neural
+        Network.
+        So he used Antoine's work to try to learn the interesting features to deduce the author of a music through these
+        notes.
+    </li>
+</ul>
+<h2>Result</h2>
+<p>The goal of this project was to explore the classification of music through several models of Artificial
+    Intelligence. Some of the results are not very convincing the models are not tailored for this specific kind of problem. The
+    results are very different between Artificial Intelligences since their implementations, structures, strengths and weaknesses are not the same.</p>
+<ul>
+    <li>Extraction from the music cheats: Antoine Lefebvre</li>
+</ul>
+<p><img src="https://i.ibb.co/3fL0Vx3/Capture-d-e-cran-2020-08-20-a-11-48-52.png" width="400" height="491"/><img
+        src="https://i.ibb.co/mc5wvJD/Capture-d-e-cran-2020-08-20-a-11-49-02.png" width="400" height="494"/></p>
+<ul>
+    <li>Neural networks: Thomas Burgaud</li>
+</ul>
+<p>
+    <img src="https://i.ibb.co/GtRGNMT/first-model.png" width="400" height="276"/>
+    <img src="https://i.ibb.co/yBYRbX3/loss-first-model-min-notes.png" alt="loss-first-model-min-notes" width="400" height="276">
+</p>
+<ul>
+    <li>Long Short-Term Memory (LSTM): Armand Megrot</li>
+</ul>
+<p>
+    <img src="https://i.ibb.co/WGp1LfK/1-Wr97by-Pt-Qe-DCs-X5-RE0-Lr-LH6-ERe-Kym-Uni-ZY5q-Oek-DPif-Mmezt-W6-Nb-l-BKj5g.png"
+         alt="" width="402" height="262"/>
+    <img src="https://i.ibb.co/HKt2JmF/1-VQJCamg-Osffc-T5-YODLo3-Y-Tc46tda1-Wuins2-MU9-Ql-Sv-G6-Pbx-I-o-Q7uc-su8w.png"
+         alt="" width="386" height="262"/>
+    <img src="https://i.ibb.co/bX3gJSp/1cv-MJXYNIozo-Rq-Lt-Ef-IPb-I9p-Xc-Ht-Arbq-Xh2tq29-Nt5s6-WZa-Dg-THCy-XA4i0-NTXJRE.png"
+         alt="" width="386" height="262"/>
+</p>
+</body>
+</html>
